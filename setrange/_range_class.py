@@ -21,6 +21,15 @@ class SetRangeUnit(SetRange[T], ABC):
     end: T
     include_end: bool
 
+    def __eq__(self, other):
+        if isinstance(other, SetRangeUnit):
+            return self.start == other.start and \
+                   self.end == other.end and \
+                   self.include_start == other.include_start and \
+                   self.include_end == other.include_end
+        else:
+            return False
+
 
 class SetRangeUnitII(SetRangeUnit[T]):
 
