@@ -11,11 +11,26 @@ class SetRange(Generic[T], ABC):
         ...
 
 
-class SetRangeUnit(SetRange[T]):
+class SetRangeUnit(SetRange[T], ABC):
     start: T
     include_start: bool
     end: T
     include_end: bool
+
+
+class SetRangeUnitII(SetRangeUnit[T]):
+
+    def __init__(self, start: T, end: T):
+        self.start = start
+        self.end = end
+        self.include_start = True
+        self.include_end = True
+
+    def __contains__(self, item):
+        return self.start <= item <= self.end
+
+
+class SetRangeUnitIE(SetRangeUnit[T]):
 
     def __init__(self, start: T, end: T):
         self.start = start
@@ -25,6 +40,30 @@ class SetRangeUnit(SetRange[T]):
 
     def __contains__(self, item):
         return self.start <= item < self.end
+
+
+class SetRangeUnitEI(SetRangeUnit[T]):
+
+    def __init__(self, start: T, end: T):
+        self.start = start
+        self.end = end
+        self.include_start = False
+        self.include_end = True
+
+    def __contains__(self, item):
+        return self.start < item <= self.end
+
+
+class SetRangeUnitEE(SetRangeUnit[T]):
+
+    def __init__(self, start: T, end: T):
+        self.start = start
+        self.end = end
+        self.include_start = False
+        self.include_end = False
+
+    def __contains__(self, item):
+        return self.start < item < self.end
 
 
 class SetRangeSum(SetRange[T]):
