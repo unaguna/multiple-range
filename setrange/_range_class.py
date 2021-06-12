@@ -14,6 +14,11 @@ class SetRange(Generic[T], ABC):
     def __eq__(self, other):
         ...
 
+    @property
+    def is_empty(self) -> bool:
+        # TODO: 抽象メソッド化
+        return False
+
 
 class SetRangeUnit(SetRange[T], ABC):
     start: T

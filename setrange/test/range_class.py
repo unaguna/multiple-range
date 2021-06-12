@@ -1,3 +1,5 @@
+import pytest
+
 from setrange import srange, SetRange
 
 
@@ -102,3 +104,26 @@ class TestSetRangeClass:
         assert 6.0 in set_range
         assert 9.0 in set_range
         assert 10.0 not in set_range
+
+    @pytest.mark.parametrize('target, is_empty', (
+            (srange(5, 5, '[]'), False),
+            (srange(5, 5, '[)'), True),
+            (srange(5, 5, '(]'), True),
+            (srange(5, 5, '()'), True),
+            (srange(5, 4, '[]'), True),
+            (srange(5, 4, '[)'), True),
+            (srange(5, 4, '(]'), True),
+            (srange(5, 4, '()'), True),
+    ))
+    def test__srange_unit_empty__start_g_end(self, target, is_empty):
+        """端点の指定次第で単レンジが空になることをテストする。
+        """
+        assert target.is_empty == is_empty
+        if is_empty:
+            assert srange(empty=True) == target
+            assert target == srange(empty=True)
+            assert not target
+        else:
+            assert srange(empty=True) != target
+            assert target != srange(empty=True)
+            assert target

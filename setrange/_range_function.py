@@ -5,7 +5,9 @@ from ._range_class import SetRange, SetRangeUnitII, SetRangeUnitEE, SetRangeUnit
 T = TypeVar('T')
 
 
-def srange(start: T, end: T, edge: str = '[)') -> SetRange[T]:
+def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
+    # TODO: start, end が None である場合の処理
+
     if edge == '[)':
         return SetRangeUnitIE(start, end)
     elif edge == '[]':
