@@ -3,6 +3,22 @@ from setrange import srange, SetRange
 
 class TestSetRangeClass:
 
+    def test__srange_unit_int__equal(self):
+        """単レンジ[int]の等号演算をテストする。
+        """
+        set_range_1: SetRange[int] = srange(5, 10)
+        set_range_2: SetRange[int] = srange(5, 10)
+        set_range_x: SetRange[int] = srange(5, 9)
+        set_range_ee: SetRange[int] = srange(5, 10, edge='()')
+        set_range_ei: SetRange[int] = srange(5, 10, edge='(]')
+        set_range_ii: SetRange[int] = srange(5, 10, edge='[]')
+
+        assert set_range_1 == set_range_2
+        assert set_range_1 != set_range_x
+        assert set_range_1 != set_range_ee
+        assert set_range_1 != set_range_ei
+        assert set_range_1 != set_range_ii
+
     def test__srange_unit_int__contain(self):
         """単レンジ[int]の含有演算をテストする。
 

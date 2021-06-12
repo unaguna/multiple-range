@@ -10,6 +10,10 @@ class SetRange(Generic[T], ABC):
     def __contains__(self, item):
         ...
 
+    @abstractmethod
+    def __eq__(self, other):
+        ...
+
 
 class SetRangeUnit(SetRange[T], ABC):
     start: T
