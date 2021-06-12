@@ -14,6 +14,10 @@ class SetRange(Generic[T], ABC):
     def __eq__(self, other):
         ...
 
+    @abstractmethod
+    def __str__(self):
+        ...
+
     def __bool__(self):
         return not self.is_empty
 
@@ -56,6 +60,9 @@ class SetRangeUnitEmpty(SetRangeUnit[T]):
     def __contains__(self, item):
         return False
 
+    def __str__(self):
+        return '(empty)'
+
     @property
     def is_empty(self) -> bool:
         return True
@@ -71,6 +78,9 @@ class SetRangeUnitII(SetRangeUnit[T]):
 
     def __contains__(self, item):
         return self.start <= item <= self.end
+
+    def __str__(self):
+        return f'[{self.start}, {self.end}]'
 
     @property
     def is_empty(self) -> bool:
@@ -88,6 +98,9 @@ class SetRangeUnitIE(SetRangeUnit[T]):
     def __contains__(self, item):
         return self.start <= item < self.end
 
+    def __str__(self):
+        return f'[{self.start}, {self.end})'
+
     @property
     def is_empty(self) -> bool:
         return False
@@ -104,6 +117,9 @@ class SetRangeUnitEI(SetRangeUnit[T]):
     def __contains__(self, item):
         return self.start < item <= self.end
 
+    def __str__(self):
+        return f'({self.start}, {self.end}]'
+
     @property
     def is_empty(self) -> bool:
         return False
@@ -119,6 +135,9 @@ class SetRangeUnitEE(SetRangeUnit[T]):
 
     def __contains__(self, item):
         return self.start < item < self.end
+
+    def __str__(self):
+        return f'({self.start}, {self.end})'
 
     @property
     def is_empty(self) -> bool:
