@@ -106,6 +106,10 @@ class TestSetRangeClass:
         assert 10.0 not in set_range
 
     @pytest.mark.parametrize('target, is_empty', (
+            (srange(5, 6, '[]'), False),
+            (srange(5, 6, '[)'), False),
+            (srange(5, 6, '(]'), False),
+            (srange(5, 6, '()'), False),
             (srange(5, 5, '[]'), False),
             (srange(5, 5, '[)'), True),
             (srange(5, 5, '(]'), True),
