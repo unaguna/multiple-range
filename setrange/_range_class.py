@@ -30,6 +30,9 @@ class SetRangeUnit(SetRange[T], ABC):
         else:
             return False
 
+    def __hash__(self):
+        return hash(('SetRangeUnit', self.start, self.end, self.include_start, self.include_end))
+
 
 class SetRangeUnitII(SetRangeUnit[T]):
 
