@@ -11,7 +11,7 @@ class SetRange(Generic[T], ABC):
         ...
 
 
-class SetRangeUnit(SetRange[T], ABC):
+class SetRangeUnit(SetRange[T]):
     start: T
     include_start: bool
     end: T
@@ -22,6 +22,9 @@ class SetRangeUnit(SetRange[T], ABC):
         self.end = end
         self.include_start = True
         self.include_end = False
+
+    def __contains__(self, item):
+        return self.start <= item < self.end
 
 
 class SetRangeSum(SetRange[T]):
