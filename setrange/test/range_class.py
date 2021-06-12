@@ -5,6 +5,15 @@ from setrange import srange, SetRange
 
 class TestSetRangeClass:
 
+    def test__srange_unit_int__str(self):
+        """単レンジ[int]の文字列化をテストする。
+        """
+        assert str(srange(empty=True)) == '(empty)'
+        assert str(srange(5, 10, edge='[]')) == '[5, 10]'
+        assert str(srange(5, 10, edge='[)')) == '[5, 10)'
+        assert str(srange(5, 10, edge='(]')) == '(5, 10]'
+        assert str(srange(5, 10, edge='()')) == '(5, 10)'
+
     def test__srange_unit_int__equal(self):
         """単レンジ[int]の等号演算をテストする。
         """
