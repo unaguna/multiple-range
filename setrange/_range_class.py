@@ -1,37 +1,18 @@
 from abc import abstractmethod, ABC
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List
 
 T = TypeVar('T')
 
 
-class SetRange(Generic[T], ABC):
-
-    @abstractmethod
-    def __contains__(self, item):
-        ...
-
-    @abstractmethod
-    def __eq__(self, other):
-        ...
-
-    @abstractmethod
-    def __str__(self):
-        ...
-
-    def __bool__(self):
-        return not self.is_empty
-
-    @property
-    @abstractmethod
-    def is_empty(self) -> bool:
-        ...
-
-
-class SetRangeUnit(SetRange[T], ABC):
+class SetRangeUnit(Generic[T], ABC):
     start: T
     include_start: bool
     end: T
     include_end: bool
+
+    @abstractmethod
+    def __contains__(self, item):
+        ...
 
     def __eq__(self, other):
         if isinstance(other, SetRangeUnit):
@@ -48,24 +29,17 @@ class SetRangeUnit(SetRange[T], ABC):
     def __hash__(self):
         return hash(('SetRangeUnit', self.start, self.end, self.include_start, self.include_end))
 
-
-class SetRangeUnitEmpty(SetRangeUnit[T]):
-
-    def __init__(self):
-        self.start = None
-        self.end = None
-        self.include_start = False
-        self.include_end = False
-
-    def __contains__(self, item):
-        return False
-
+    @abstractmethod
     def __str__(self):
-        return '(empty)'
+        ...
+
+    def __bool__(self):
+        return not self.is_empty
 
     @property
+    @abstractmethod
     def is_empty(self) -> bool:
-        return True
+        ...
 
 
 class SetRangeUnitII(SetRangeUnit[T]):
@@ -144,5 +118,35 @@ class SetRangeUnitEE(SetRangeUnit[T]):
         return False
 
 
-class SetRangeSum(SetRange[T]):
-    pass
+class SetRange(Generic[T]):
+    unit_list: List[SetRangeUnit[T]]
+
+    def __init__(self, *units: SetRangeUnit[T]):
+        # 引数に与えられた unit のリストは以下の条件を満たさなければならない。
+        # ・unit 同士は共通部分を持たない
+        # ・空の unit が含まれない
+        # ・start, include_start, end, include_end でソートされている
+        self.unit_list = list(units)
+
+    def __contains__(self, item):
+        for unit in self.unit_list:
+            if item in unit:
+                return True
+        else:
+            return False
+
+    def __eq__(self, other):
+        return self.unit_list == other.unit_list
+
+    def __str__(self):
+        if self.is_empty:
+            return '(empty)'
+        else:
+            return '∪'.join(map(str, self.unit_list))
+
+    def __bool__(self):
+        return not self.is_empty
+
+    @property
+    def is_empty(self) -> bool:
+        return len(self.unit_list) <= 0

@@ -1,6 +1,6 @@
 from typing import TypeVar
 
-from ._range_class import SetRange, SetRangeUnitII, SetRangeUnitEE, SetRangeUnitEI, SetRangeUnitIE, SetRangeUnitEmpty
+from ._range_class import SetRange, SetRangeUnitII, SetRangeUnitEE, SetRangeUnitEI, SetRangeUnitIE
 
 T = TypeVar('T')
 
@@ -9,27 +9,27 @@ def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False
     # TODO: start, end が None である場合の処理
 
     if empty:
-        return SetRangeUnitEmpty()
+        return SetRange()
 
     if edge == '[)':
         if start < end:
-            return SetRangeUnitIE(start, end)
+            return SetRange(SetRangeUnitIE(start, end))
         else:
-            return SetRangeUnitEmpty()
+            return SetRange()
     elif edge == '[]':
         if start <= end:
-            return SetRangeUnitII(start, end)
+            return SetRange(SetRangeUnitII(start, end))
         else:
-            return SetRangeUnitEmpty()
+            return SetRange()
     elif edge == '(]':
         if start < end:
-            return SetRangeUnitEI(start, end)
+            return SetRange(SetRangeUnitEI(start, end))
         else:
-            return SetRangeUnitEmpty()
+            return SetRange()
     elif edge == '()':
         if start < end:
-            return SetRangeUnitEE(start, end)
+            return SetRange(SetRangeUnitEE(start, end))
         else:
-            return SetRangeUnitEmpty()
+            return SetRange()
 
     # TODO: edge が想定外である場合の処理
