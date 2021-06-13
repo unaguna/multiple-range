@@ -35,6 +35,10 @@ class SetRangeUnit(Generic[T], ABC):
     def __str__(self):
         ...
 
+    def __repr__(self):
+        return f'srange({self.start}, {self.end}, ' \
+               f'\'{"[" if self.include_start else "("}{"]" if self.include_end else ")"}\')'
+
     def __bool__(self):
         return not self.is_empty
 
@@ -219,6 +223,9 @@ class SetRange(Generic[T]):
             return '(empty)'
         else:
             return '∪'.join(map(str, self._unit_list))
+
+    def __repr__(self):
+        return ' + '.join(map(repr, self._unit_list))
 
     def __bool__(self):
         return not self.is_empty
