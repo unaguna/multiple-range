@@ -150,6 +150,15 @@ class SetRange(Generic[T]):
     def __bool__(self):
         return not self.is_empty
 
+    def __add__(self, other):
+        """集合論における合併演算
+
+        Returns
+        -------
+        SetRange[T]
+        """
+        # TODO: 実装
+
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0

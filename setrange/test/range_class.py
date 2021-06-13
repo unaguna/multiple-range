@@ -140,3 +140,70 @@ class TestSetRangeClass:
             assert srange(empty=True) != target
             assert target != srange(empty=True)
             assert target
+
+    @pytest.mark.parametrize('srange1, srange2, srange_m', (
+            # 単レンジ同士で一方の終点ともう一方の始点が一致するパターン
+            (srange(5, 6, '[]'), srange(6, 7, '[]'), srange(5, 7, '[]')),
+            (srange(5, 6, '[)'), srange(6, 7, '[]'), srange(5, 7, '[]')),
+            (srange(5, 6, '(]'), srange(6, 7, '[]'), srange(5, 7, '(]')),
+            (srange(5, 6, '()'), srange(6, 7, '[]'), srange(5, 7, '(]')),
+            (srange(5, 6, '[]'), srange(6, 7, '[)'), srange(5, 7, '[)')),
+            (srange(5, 6, '[)'), srange(6, 7, '[)'), srange(5, 7, '[)')),
+            (srange(5, 6, '(]'), srange(6, 7, '[)'), srange(5, 7, '()')),
+            (srange(5, 6, '()'), srange(6, 7, '[)'), srange(5, 7, '()')),
+            (srange(5, 6, '[]'), srange(6, 7, '(]'), srange(5, 7, '[]')),
+            (srange(5, 6, '[)'), srange(6, 7, '(]'), [srange(5, 6, '[)'), srange(6, 7, '(]')]),
+            (srange(5, 6, '(]'), srange(6, 7, '(]'), srange(5, 7, '(]')),
+            (srange(5, 6, '()'), srange(6, 7, '(]'), [srange(5, 6, '()'), srange(6, 7, '(]')]),
+            (srange(5, 6, '[]'), srange(6, 7, '()'), srange(5, 7, '[)')),
+            (srange(5, 6, '[)'), srange(6, 7, '()'), [srange(5, 6, '[)'), srange(6, 7, '()')]),
+            (srange(5, 6, '(]'), srange(6, 7, '()'), srange(5, 7, '()')),
+            (srange(5, 6, '()'), srange(6, 7, '()'), [srange(5, 6, '()'), srange(6, 7, '()')]),
+            # 単レンジ同士で一方ともう一方に共通部分がないパターン
+            (srange(5, 6, '[]'), srange(7, 8, '[]'), [srange(5, 6, '[]'), srange(7, 8, '[]')]),
+            (srange(5, 6, '[)'), srange(7, 8, '[]'), [srange(5, 6, '[)'), srange(7, 8, '[]')]),
+            (srange(5, 6, '(]'), srange(7, 8, '[]'), [srange(5, 6, '(]'), srange(7, 8, '[]')]),
+            (srange(5, 6, '()'), srange(7, 8, '[]'), [srange(5, 6, '()'), srange(7, 8, '[]')]),
+            (srange(5, 6, '[]'), srange(7, 8, '[)'), [srange(5, 6, '[]'), srange(7, 8, '[)')]),
+            (srange(5, 6, '[)'), srange(7, 8, '[)'), [srange(5, 6, '[)'), srange(7, 8, '[)')]),
+            (srange(5, 6, '(]'), srange(7, 8, '[)'), [srange(5, 6, '(]'), srange(7, 8, '[)')]),
+            (srange(5, 6, '()'), srange(7, 8, '[)'), [srange(5, 6, '()'), srange(7, 8, '[)')]),
+            (srange(5, 6, '[]'), srange(7, 8, '(]'), [srange(5, 6, '[]'), srange(7, 8, '(]')]),
+            (srange(5, 6, '[)'), srange(7, 8, '(]'), [srange(5, 6, '[)'), srange(7, 8, '(]')]),
+            (srange(5, 6, '(]'), srange(7, 8, '(]'), [srange(5, 6, '(]'), srange(7, 8, '(]')]),
+            (srange(5, 6, '()'), srange(7, 8, '(]'), [srange(5, 6, '()'), srange(7, 8, '(]')]),
+            (srange(5, 6, '[]'), srange(7, 8, '()'), [srange(5, 6, '[]'), srange(7, 8, '()')]),
+            (srange(5, 6, '[)'), srange(7, 8, '()'), [srange(5, 6, '[)'), srange(7, 8, '()')]),
+            (srange(5, 6, '(]'), srange(7, 8, '()'), [srange(5, 6, '(]'), srange(7, 8, '()')]),
+            (srange(5, 6, '()'), srange(7, 8, '()'), [srange(5, 6, '()'), srange(7, 8, '()')]),
+            # 単レンジ同士で一方ともう一方にシングルトンでない共通部分があるパターン
+            (srange(5, 7, '[]'), srange(6, 8, '[]'), srange(5, 8, '[]')),
+            (srange(5, 7, '[)'), srange(6, 8, '[]'), srange(5, 8, '[]')),
+            (srange(5, 7, '(]'), srange(6, 8, '[]'), srange(5, 8, '(]')),
+            (srange(5, 7, '()'), srange(6, 8, '[]'), srange(5, 8, '(]')),
+            (srange(5, 7, '[]'), srange(6, 8, '[)'), srange(5, 8, '[)')),
+            (srange(5, 7, '[)'), srange(6, 8, '[)'), srange(5, 8, '[)')),
+            (srange(5, 7, '(]'), srange(6, 8, '[)'), srange(5, 8, '()')),
+            (srange(5, 7, '()'), srange(6, 8, '[)'), srange(5, 8, '()')),
+            (srange(5, 7, '[]'), srange(6, 8, '(]'), srange(5, 8, '[]')),
+            (srange(5, 7, '[)'), srange(6, 8, '(]'), srange(5, 8, '[]')),
+            (srange(5, 7, '(]'), srange(6, 8, '(]'), srange(5, 8, '(]')),
+            (srange(5, 7, '()'), srange(6, 8, '(]'), srange(5, 8, '(]')),
+            (srange(5, 7, '[]'), srange(6, 8, '()'), srange(5, 8, '[)')),
+            (srange(5, 7, '[)'), srange(6, 8, '()'), srange(5, 8, '[)')),
+            (srange(5, 7, '(]'), srange(6, 8, '()'), srange(5, 8, '()')),
+            (srange(5, 7, '()'), srange(6, 8, '()'), srange(5, 8, '()')),
+            # 一方が空のパターン
+            (srange(5, 6, '[]'), srange(empty=True), srange(5, 6, '[]')),
+            (srange(empty=True), srange(empty=True), srange(empty=True)),
+    ))
+    def test__srange_unit_int__add__unit(self, srange1, srange2, srange_m):
+        """レンジ[int]()の加法演算 (合併) をテストする。
+        """
+        if isinstance(srange_m, list):
+            result = srange1 + srange2
+            assert not result.is_empty
+            assert result._unit_list == srange_m
+        else:
+            result = srange1 + srange2
+            assert result == srange_m
