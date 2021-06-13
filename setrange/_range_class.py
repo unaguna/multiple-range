@@ -200,7 +200,7 @@ class SetRange(Generic[T]):
         # 引数に与えられた unit のリストは以下の条件を満たさなければならない。
         # ・unit 同士は共通部分を持たない
         # ・空の unit が含まれない
-        # ・start, include_start, end, include_end でソートされている
+        # ・start でソートされている
         self._unit_list = list(units)
 
     def __contains__(self, item):
