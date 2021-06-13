@@ -255,6 +255,15 @@ class SetRange(Generic[T]):
                     # l_unit と r_unit の和が区間になる場合は統合して次へ
                     left_unit_list[l_index] = sum_unit
                     r_index += 1
+
+                    # 統合後の区間を left に入れたことで、非標準系になりうるので標準化
+                    while l_index + 1 < len(left_unit_list):
+                        tmp_unit = _sum_units(left_unit_list[l_index], left_unit_list[l_index+1])
+                        if tmp_unit is None:
+                            break
+                        else:
+                            left_unit_list[l_index + 1] = tmp_unit
+                            l_index += 1
                 else:
                     # 和が区間にならないなら、より値が小さいほうはそのまま結果として採用する。
                     if l_unit.start < r_unit.start:
