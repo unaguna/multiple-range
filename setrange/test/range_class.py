@@ -201,9 +201,16 @@ class TestSetRangeClass:
         """レンジ[int]()の加法演算 (合併) をテストする。
         """
         if isinstance(srange_m, list):
+            result = srange2 + srange1
+            assert not result.is_empty
+            assert result._unit_list == srange_m
+
             result = srange1 + srange2
             assert not result.is_empty
             assert result._unit_list == srange_m
         else:
+            result = srange2 + srange1
+            assert result == srange_m
+
             result = srange1 + srange2
             assert result == srange_m

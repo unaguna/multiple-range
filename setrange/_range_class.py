@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import TypeVar, Generic, List
+from typing import TypeVar, Generic, List, Optional
 
 T = TypeVar('T')
 
@@ -120,6 +120,75 @@ class SetRangeUnitEE(SetRangeUnit[T]):
         return False
 
 
+def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> Optional[SetRangeUnit[T]]:
+    """SetRangeUnit を継承したインスタンスを作成する。
+
+    Parameters
+    ----------
+    start
+        始点
+    end
+        終点
+    include_start
+        始点を含有するかどうか
+    include_end
+        終点を含有するかどうか
+
+    Returns
+    -------
+    SetRangeUnit[T]
+        構成したインスタンス。空集合となる場合は None。
+    """
+    if include_start and not include_end:
+        if start < end:
+            return SetRangeUnitIE(start, end)
+        else:
+            return None
+    elif include_start and include_end:
+        if start <= end:
+            return SetRangeUnitII(start, end)
+        else:
+            return None
+    elif not include_start and include_end:
+        if start < end:
+            return SetRangeUnitEI(start, end)
+        else:
+            return None
+    elif not include_start and not include_end:
+        if start < end:
+            return SetRangeUnitEE(start, end)
+        else:
+            return None
+
+
+def _sum_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUnit[T]]:
+    """2つのレンジの合併がレンジである場合に、その合併を返す。
+
+    Returns
+    -------
+    SetRangeUnit[T]
+        2つのレンジの合併がレンジである場合は合併。そうでない場合は None。
+    """
+    if e1.start > e2.start or (e1.start == e2.start and e2.include_start):
+        e1, e2 = e2, e1
+
+    if e1.end < e2.start:
+        return None
+    if e1.end == e2.start and not e1.include_end and not e2.include_start:
+        return None
+
+    start_point = e1
+    if e1.end < e2.end or (e1.end == e2.end and e2.include_end):
+        end_point = e2
+    else:
+        end_point = e1
+
+    return construct_unit(start=start_point.start,
+                          end=end_point.end,
+                          include_start=start_point.include_start,
+                          include_end=end_point.include_end)
+
+
 class SetRange(Generic[T]):
     _unit_list: List[SetRangeUnit[T]]
 
@@ -161,7 +230,40 @@ class SetRange(Generic[T]):
         -------
         SetRange[T]
         """
-        # TODO: 実装
+        if isinstance(other, SetRange):
+            result_unit_list = list()
+            left_unit_list = list(self._unit_list)
+            right_unit_list = list(other._unit_list)
+            l_index = 0
+            r_index = 0
+
+            while l_index < len(left_unit_list) and r_index < len(right_unit_list):
+                l_unit = left_unit_list[l_index]
+                r_unit = right_unit_list[r_index]
+
+                # 和
+                sum_unit = _sum_units(l_unit, r_unit)
+
+                if sum_unit is not None:
+                    # l_unit と r_unit の和が区間になる場合は統合して次へ
+                    left_unit_list[l_index] = sum_unit
+                    r_index += 1
+                else:
+                    # 和が区間にならないなら、より値が小さいほうはそのまま結果として採用する。
+                    if l_unit.start < r_unit.start:
+                        result_unit_list.append(l_unit)
+                        l_index += 1
+                    else:
+                        result_unit_list.append(r_unit)
+                        r_index += 1
+
+            result_unit_list.extend(left_unit_list[l_index:])
+            result_unit_list.extend(right_unit_list[r_index:])
+
+            return SetRange(*result_unit_list)
+
+        else:
+            raise TypeError(f'unsupported operand type(s) for +: \'{type(self)}\' and \'{type(other)}\'')
 
     @property
     def is_empty(self) -> bool:
