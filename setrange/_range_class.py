@@ -119,34 +119,37 @@ class SetRangeUnitEE(SetRangeUnit[T]):
 
 
 class SetRange(Generic[T]):
-    unit_list: List[SetRangeUnit[T]]
+    _unit_list: List[SetRangeUnit[T]]
 
     def __init__(self, *units: SetRangeUnit[T]):
         # 引数に与えられた unit のリストは以下の条件を満たさなければならない。
         # ・unit 同士は共通部分を持たない
         # ・空の unit が含まれない
         # ・start, include_start, end, include_end でソートされている
-        self.unit_list = list(units)
+        self._unit_list = list(units)
 
     def __contains__(self, item):
-        for unit in self.unit_list:
+        for unit in self._unit_list:
             if item in unit:
                 return True
         else:
             return False
 
     def __eq__(self, other):
-        return self.unit_list == other.unit_list
+        if isinstance(other, SetRange):
+            return self._unit_list == other._unit_list
+        else:
+            return False
 
     def __str__(self):
         if self.is_empty:
             return '(empty)'
         else:
-            return '∪'.join(map(str, self.unit_list))
+            return '∪'.join(map(str, self._unit_list))
 
     def __bool__(self):
         return not self.is_empty
 
     @property
     def is_empty(self) -> bool:
-        return len(self.unit_list) <= 0
+        return len(self._unit_list) <= 0
