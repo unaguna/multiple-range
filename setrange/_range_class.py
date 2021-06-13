@@ -281,6 +281,9 @@ class SetRange(Generic[T]):
         else:
             raise TypeError(f'unsupported operand type(s) for +: \'{type(self)}\' and \'{type(other)}\'')
 
+    def __mul__(self, other):
+        ...
+
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
