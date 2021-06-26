@@ -193,6 +193,34 @@ def _sum_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUni
                           include_end=end_point.include_end)
 
 
+def _mul_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUnit[T]]:
+    """2つのレンジの交叉を返す。
+
+    Returns
+    -------
+    SetRangeUnit[T]
+        2つのレンジの交叉が空集合でない場合は交叉。空集合である場合は None。
+    """
+    if e1.start > e2.start or (e1.start == e2.start and e2.include_start):
+        e1, e2 = e2, e1
+
+    if e1.end < e2.start:
+        return None
+    if e1.end == e2.start and not (e1.include_end and e2.include_start):
+        return None
+
+    start_point = e2
+    if e1.end < e2.end or (e1.end == e2.end and not e1.include_end):
+        end_point = e1
+    else:
+        end_point = e2
+
+    return construct_unit(start=start_point.start,
+                          end=end_point.end,
+                          include_start=start_point.include_start,
+                          include_end=end_point.include_end)
+
+
 class SetRange(Generic[T]):
     _unit_list: List[SetRangeUnit[T]]
 
@@ -280,6 +308,32 @@ class SetRange(Generic[T]):
 
         else:
             raise TypeError(f'unsupported operand type(s) for +: \'{type(self)}\' and \'{type(other)}\'')
+
+    def __mul__(self, other):
+        """集合論における交叉演算
+
+        Returns
+        -------
+        SetRange[T]
+        """
+        if isinstance(other, SetRange):
+            # 分配法則 (a+b)*(c+d) = (a+b)*c + (a+b)*d を使用する。
+            unit_list_r = list(other._unit_list)
+
+            result = SetRange()
+            for set_range in map(lambda u: self * u, unit_list_r):
+                result += set_range
+
+            return result
+        elif isinstance(other, SetRangeUnit):
+            # SetRange 同士の積の演算の中で SetRange * SetRangeUnit がよばれるため、この分岐が必要。
+
+            # 分配法則 (a+b)*c = a*c + b*c を使用する。
+            # c をかけることで a, b の順序が逆転したり共通部分が生じたりすることはないため、改めて標準化する必要はない。
+            result_unit_list = filter(lambda u: u is not None, map(lambda u: _mul_units(u, other), self._unit_list))
+            return SetRange(*result_unit_list)
+        else:
+            raise TypeError(f'unsupported operand type(s) for *: \'{type(self)}\' and \'{type(other)}\'')
 
     @property
     def is_empty(self) -> bool:
