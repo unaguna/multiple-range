@@ -373,9 +373,13 @@ class TestSetRangeClass:
             (srange(5, 9, '[)'), srange(7, 12, '()'), srange(7, 9, '()')),
             (srange(5, 9, '(]'), srange(7, 12, '()'), srange(7, 9, '(]')),
             (srange(5, 9, '()'), srange(7, 12, '()'), srange(7, 9, '()')),
+            # オペランドが単レンジでない場合
+            (srange(5, 10, '(]') + srange(15, 20, '[)'), srange(7, 8, '()') + srange(9, 18, '()'),
+             srange(7, 8, '()') + srange(9, 10, '(]') + srange(15, 18, '[)')),
+            (srange(5, 10, '(]') + srange(15, 20, '[)'), srange(empty=True), srange(empty=True)),
     ))
     def test__srange_unit_int__mul(self, srange1, srange2, srange_m):
-        """単レンジ[int]()の乗法演算 (交叉) をテストする。
+        """レンジ[int]()の乗法演算 (交叉) をテストする。
         """
         assert srange1 * srange2 == srange_m
         assert srange2 * srange1 == srange_m
