@@ -373,6 +373,11 @@ class TestSetRangeClass:
             (srange(5, 9, '[)'), srange(7, 12, '()'), srange(7, 9, '()')),
             (srange(5, 9, '(]'), srange(7, 12, '()'), srange(7, 9, '(]')),
             (srange(5, 9, '()'), srange(7, 12, '()'), srange(7, 9, '()')),
+            # 共通部分がシングルトンであるパターン
+            (srange(5, 9, '(]'), srange(9, 12, '[)'), srange(9, 9, '[]')),
+            (srange(5, 9, '[]'), srange(9, 12, '[)'), srange(9, 9, '[]')),
+            (srange(5, 9, '(]'), srange(9, 12, '[]'), srange(9, 9, '[]')),
+            (srange(5, 9, '[]'), srange(9, 12, '[]'), srange(9, 9, '[]')),
             # オペランドが単レンジでない場合
             (srange(5, 10, '(]') + srange(15, 20, '[)'), srange(7, 8, '()') + srange(9, 18, '()'),
              srange(7, 8, '()') + srange(9, 10, '(]') + srange(15, 18, '[)')),
