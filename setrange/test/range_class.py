@@ -1,9 +1,22 @@
 import pytest
 
-from setrange import srange
+from setrange import srange, SetRange
 
 
 class TestSetRangeClass:
+
+    @pytest.mark.parametrize('set_range', (
+            srange(empty=True),
+            srange(5, 10, edge='[]'),
+            srange(5, 10, edge='[)'),
+            srange(5, 10, edge='(]'),
+            srange(5, 10, edge='()'),
+            srange('f', 's'),
+    ))
+    def test__srange_unit__type(self, set_range):
+        """srange関数の戻り値の型をテストする
+        """
+        assert isinstance(set_range, SetRange)
 
     @pytest.mark.parametrize('set_range, expected_str', (
             (srange(empty=True), '(empty)'),
