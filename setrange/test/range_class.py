@@ -60,6 +60,13 @@ class TestSetRangeClass:
             (srange(None, None), srange(None, None, edge='()'), True),
             (srange(None, None), srange(None, None, edge='(]'), True),
             (srange(None, None), srange(None, None, edge='[]'), True),
+            (srange(start=5), srange(5, None), True),
+            (srange(start=5, edge='[)'), srange(5, None, edge='[)'), True),
+            (srange(start=5, edge='()'), srange(5, None, edge='()'), True),
+            (srange(end=10), srange(None, 10), True),
+            (srange(end=10, edge='(]'), srange(None, 10, edge='(]'), True),
+            (srange(end=10, edge='()'), srange(None, 10, edge='()'), True),
+            (srange(), srange(None, None), True),
     ))
     def test__srange_unit_int__equal(self, set_range_1, set_range_2, expected_equal):
         """単レンジ[int]の等号演算をテストする。
