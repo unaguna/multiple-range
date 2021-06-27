@@ -1,6 +1,7 @@
 from typing import TypeVar, Optional, overload
 
 from ._range_class import construct_unit, SetRange
+from ._range_end_point import MinEndPoint, MaxEndPoint
 
 T = TypeVar('T')
 
@@ -26,19 +27,24 @@ def srange(start: None = None, end: None = None, edge: str = '()', empty: bool =
 
 
 def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
-    # TODO: start, end が None である場合の処理
 
     if empty:
         return SetRange()
 
-    if edge[0] == '[':
+    if start is None:
+        start = MinEndPoint()
+        include_start = False
+    elif edge[0] == '[':
         include_start = True
     elif edge[0] == '(':
         include_start = False
     else:
         raise ValueError('edge must be \'[]\', \'[)\', \'(]\', or \'()\'.')
 
-    if edge[1] == ']':
+    if end is None:
+        end = MaxEndPoint()
+        include_end = False
+    elif edge[1] == ']':
         include_end = True
     elif edge[1] == ')':
         include_end = False
