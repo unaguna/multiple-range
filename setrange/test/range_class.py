@@ -5,114 +5,148 @@ from setrange import srange, SetRange
 
 class TestSetRangeClass:
 
-    def test__srange_unit_int__str(self):
+    @pytest.mark.parametrize('set_range', (
+            srange(empty=True),
+            srange(5, 10, edge='[]'),
+            srange(5, 10, edge='[)'),
+            srange(5, 10, edge='(]'),
+            srange(5, 10, edge='()'),
+            srange('f', 's'),
+    ))
+    def test__srange_unit__type(self, set_range):
+        """srange関数の戻り値の型をテストする
+        """
+        assert isinstance(set_range, SetRange)
+
+    @pytest.mark.parametrize('set_range, expected_str', (
+            (srange(empty=True), '(empty)'),
+            (srange(5, 10, edge='[]'), '[5, 10]'),
+            (srange(5, 10, edge='[)'), '[5, 10)'),
+            (srange(5, 10, edge='(]'), '(5, 10]'),
+            (srange(5, 10, edge='()'), '(5, 10)'),
+            (srange(None, 10, edge='[]'), '(-inf, 10]'),
+            (srange(None, 10, edge='[)'), '(-inf, 10)'),
+            (srange(None, 10, edge='(]'), '(-inf, 10]'),
+            (srange(None, 10, edge='()'), '(-inf, 10)'),
+            (srange(5, None, edge='[]'), '[5, inf)'),
+            (srange(5, None, edge='[)'), '[5, inf)'),
+            (srange(5, None, edge='(]'), '(5, inf)'),
+            (srange(5, None, edge='()'), '(5, inf)'),
+            (srange(None, None, edge='[]'), '(-inf, inf)'),
+            (srange(None, None, edge='[)'), '(-inf, inf)'),
+            (srange(None, None, edge='(]'), '(-inf, inf)'),
+            (srange(None, None, edge='()'), '(-inf, inf)'),
+    ))
+    def test__srange_unit_int__str(self, set_range, expected_str):
         """単レンジ[int]の文字列化をテストする。
         """
-        assert str(srange(empty=True)) == '(empty)'
-        assert str(srange(5, 10, edge='[]')) == '[5, 10]'
-        assert str(srange(5, 10, edge='[)')) == '[5, 10)'
-        assert str(srange(5, 10, edge='(]')) == '(5, 10]'
-        assert str(srange(5, 10, edge='()')) == '(5, 10)'
+        assert str(set_range) == expected_str
 
-    def test__srange_unit_int__equal(self):
+    @pytest.mark.parametrize('set_range_1, set_range_2, expected_equal', (
+            (srange(5, 10), srange(5, 10), True),
+            (srange(5, 10), srange(5, 9), False),
+            (srange(5, 10), srange(5, 10, edge='()'), False),
+            (srange(5, 10), srange(5, 10, edge='(]'), False),
+            (srange(5, 10), srange(5, 10, edge='[]'), False),
+            (srange(None, 10), srange(None, 10, edge='[)'), True),
+            (srange(None, 10), srange(None, 10, edge='()'), True),
+            (srange(None, 10), srange(None, 10, edge='(]'), False),
+            (srange(None, 10), srange(None, 10, edge='[]'), False),
+            (srange(5, None), srange(5, None, edge='[)'), True),
+            (srange(5, None), srange(5, None, edge='()'), False),
+            (srange(5, None), srange(5, None, edge='(]'), False),
+            (srange(5, None), srange(5, None, edge='[]'), True),
+            (srange(None, None), srange(None, None, edge='[)'), True),
+            (srange(None, None), srange(None, None, edge='()'), True),
+            (srange(None, None), srange(None, None, edge='(]'), True),
+            (srange(None, None), srange(None, None, edge='[]'), True),
+            (srange(start=5), srange(5, None), True),
+            (srange(start=5, edge='[)'), srange(5, None, edge='[)'), True),
+            (srange(start=5, edge='()'), srange(5, None, edge='()'), True),
+            (srange(end=10), srange(None, 10), True),
+            (srange(end=10, edge='(]'), srange(None, 10, edge='(]'), True),
+            (srange(end=10, edge='()'), srange(None, 10, edge='()'), True),
+            (srange(), srange(None, None), True),
+    ))
+    def test__srange_unit_int__equal(self, set_range_1, set_range_2, expected_equal):
         """単レンジ[int]の等号演算をテストする。
         """
-        set_range_1: SetRange[int] = srange(5, 10)
-        set_range_2: SetRange[int] = srange(5, 10)
-        set_range_x: SetRange[int] = srange(5, 9)
-        set_range_ee: SetRange[int] = srange(5, 10, edge='()')
-        set_range_ei: SetRange[int] = srange(5, 10, edge='(]')
-        set_range_ii: SetRange[int] = srange(5, 10, edge='[]')
+        if expected_equal:
+            assert set_range_1 == set_range_2
+            assert set_range_2 == set_range_1
+        else:
+            assert set_range_1 != set_range_2
+            assert set_range_2 != set_range_1
 
-        assert set_range_1 == set_range_2
-        assert set_range_1 != set_range_x
-        assert set_range_1 != set_range_ee
-        assert set_range_1 != set_range_ei
-        assert set_range_1 != set_range_ii
+    @pytest.mark.parametrize('set_range, element, expected_contain', (
+            (srange(5, 10), 4, False),
+            (srange(5, 10), 5, True),
+            (srange(5, 10), 9, True),
+            (srange(5, 10), 10, False),
+            (srange(5, 10), 4.0, False),
+            (srange(5, 10), 5.0, True),
+            (srange(5, 10), 9.0, True),
+            (srange(5, 10), 10.0, False),
+            (srange(5, 10, '[]'), 4, False),
+            (srange(5, 10, '[]'), 5, True),
+            (srange(5, 10, '[]'), 10, True),
+            (srange(5, 10, '[]'), 11, False),
+            (srange(5, 10, '[]'), 4.0, False),
+            (srange(5, 10, '[]'), 5.0, True),
+            (srange(5, 10, '[]'), 10.0, True),
+            (srange(5, 10, '[]'), 11.0, False),
+            (srange(5, 10, '[)'), 4, False),
+            (srange(5, 10, '[)'), 5, True),
+            (srange(5, 10, '[)'), 9, True),
+            (srange(5, 10, '[)'), 10, False),
+            (srange(5, 10, '[)'), 4.0, False),
+            (srange(5, 10, '[)'), 5.0, True),
+            (srange(5, 10, '[)'), 9.0, True),
+            (srange(5, 10, '[)'), 10.0, False),
+            (srange(5, 10, '(]'), 5, False),
+            (srange(5, 10, '(]'), 6, True),
+            (srange(5, 10, '(]'), 10, True),
+            (srange(5, 10, '(]'), 11, False),
+            (srange(5, 10, '(]'), 5.0, False),
+            (srange(5, 10, '(]'), 6.0, True),
+            (srange(5, 10, '(]'), 10.0, True),
+            (srange(5, 10, '(]'), 11.0, False),
+            (srange(5, 10, '()'), 5, False),
+            (srange(5, 10, '()'), 6, True),
+            (srange(5, 10, '()'), 9, True),
+            (srange(5, 10, '()'), 10, False),
+            (srange(5, 10, '()'), 5.0, False),
+            (srange(5, 10, '()'), 6.0, True),
+            (srange(5, 10, '()'), 9.0, True),
+            (srange(5, 10, '()'), 10.0, False),
+            (srange(None, 10, '(]'), -10, True),
+            (srange(None, 10, '(]'), 10, True),
+            (srange(None, 10, '(]'), 11, False),
+            (srange(None, 10, '()'), -10, True),
+            (srange(None, 10, '()'), 9, True),
+            (srange(None, 10, '()'), 10, False),
+            (srange(5, None, '[)'), 4, False),
+            (srange(5, None, '[)'), 5, True),
+            (srange(5, None, '[)'), 100, True),
+            (srange(5, None, '()'), 5, False),
+            (srange(5, None, '()'), 6, True),
+            (srange(5, None, '()'), 100, True),
+            (srange('f', 's'), 'e', False),
+            (srange('f', 's'), 'ee', False),
+            (srange('f', 's'), 'f', True),
+            (srange('f', 's'), 'fa', True),
+            (srange('f', 's'), 's', False),
+            (srange('f', 's'), 'sa', False),
+    ))
+    def test__srange_unit__contain(self, set_range, element, expected_contain):
+        """単レンジの含有演算をテストする。
 
-    def test__srange_unit_int__contain(self):
-        """単レンジ[int]の含有演算をテストする。
-
-        int 型で指定した端点と比較できるオブジェクトであれば、含有するかどうか確かめられる。
+        端点と比較できるオブジェクトであれば、含有するかどうか確かめられる。
         """
-        set_range: SetRange[int] = srange(5, 10)
-
-        assert 4 not in set_range
-        assert 5 in set_range
-        assert 9 in set_range
-        assert 10 not in set_range
-        assert 4.0 not in set_range
-        assert 5.0 in set_range
-        assert 9.0 in set_range
-        assert 10.0 not in set_range
-
-    def test__srange_unit_str__contain(self):
-        """単レンジ[str]の含有演算をテストする。
-        """
-        set_range: SetRange[str] = srange('f', 's')
-
-        assert 'e' not in set_range
-        assert 'ea' not in set_range
-        assert 'f' in set_range
-        assert 'fa' in set_range
-        assert 's' not in set_range
-        assert 'sa' not in set_range
-
-    def test__srange_unit_int_ie__contain(self):
-        """単レンジ[int][)の含有演算をテストする。
-        """
-        set_range: SetRange[int] = srange(5, 10, '[)')
-
-        assert 4 not in set_range
-        assert 5 in set_range
-        assert 9 in set_range
-        assert 10 not in set_range
-        assert 4.0 not in set_range
-        assert 5.0 in set_range
-        assert 9.0 in set_range
-        assert 10.0 not in set_range
-
-    def test__srange_unit_int_ei__contain(self):
-        """単レンジ[int](]の含有演算をテストする。
-        """
-        set_range: SetRange[int] = srange(5, 10, '(]')
-
-        assert 5 not in set_range
-        assert 6 in set_range
-        assert 10 in set_range
-        assert 11 not in set_range
-        assert 5.0 not in set_range
-        assert 6.0 in set_range
-        assert 10.0 in set_range
-        assert 11.0 not in set_range
-
-    def test__srange_unit_int_ii__contain(self):
-        """単レンジ[int][]の含有演算をテストする。
-        """
-        set_range: SetRange[int] = srange(5, 10, '[]')
-
-        assert 4 not in set_range
-        assert 5 in set_range
-        assert 10 in set_range
-        assert 11 not in set_range
-        assert 4.0 not in set_range
-        assert 5.0 in set_range
-        assert 10.0 in set_range
-        assert 11.0 not in set_range
-
-    def test__srange_unit_int_ee__contain(self):
-        """単レンジ[int]()の含有演算をテストする。
-        """
-        set_range: SetRange[int] = srange(5, 10, '()')
-
-        assert 5 not in set_range
-        assert 6 in set_range
-        assert 9 in set_range
-        assert 10 not in set_range
-        assert 5.0 not in set_range
-        assert 6.0 in set_range
-        assert 9.0 in set_range
-        assert 10.0 not in set_range
+        if expected_contain:
+            assert element in set_range
+        else:
+            assert element not in set_range
 
     @pytest.mark.parametrize('target, is_empty', (
             (srange(5, 6, '[]'), False),
@@ -127,6 +161,18 @@ class TestSetRangeClass:
             (srange(5, 4, '[)'), True),
             (srange(5, 4, '(]'), True),
             (srange(5, 4, '()'), True),
+            (srange(None, 6, '[]'), False),
+            (srange(None, 6, '[)'), False),
+            (srange(None, 6, '(]'), False),
+            (srange(None, 6, '()'), False),
+            (srange(5, None, '[]'), False),
+            (srange(5, None, '[)'), False),
+            (srange(5, None, '(]'), False),
+            (srange(5, None, '()'), False),
+            (srange(None, None, '[]'), False),
+            (srange(None, None, '[)'), False),
+            (srange(None, None, '(]'), False),
+            (srange(None, None, '()'), False),
     ))
     def test__srange_unit_empty__start_g_end(self, target, is_empty):
         """端点の指定次第で単レンジが空になることをテストする。
@@ -159,6 +205,26 @@ class TestSetRangeClass:
             (srange(5, 6, '[)'), srange(6, 7, '()'), [srange(5, 6, '[)'), srange(6, 7, '()')]),
             (srange(5, 6, '(]'), srange(6, 7, '()'), srange(5, 7, '()')),
             (srange(5, 6, '()'), srange(6, 7, '()'), [srange(5, 6, '()'), srange(6, 7, '()')]),
+            (srange(None, 6, '(]'), srange(6, 7, '[]'), srange(None, 7, '(]')),
+            (srange(None, 6, '()'), srange(6, 7, '[]'), srange(None, 7, '(]')),
+            (srange(None, 6, '(]'), srange(6, 7, '[)'), srange(None, 7, '()')),
+            (srange(None, 6, '()'), srange(6, 7, '[)'), srange(None, 7, '()')),
+            (srange(None, 6, '(]'), srange(6, 7, '(]'), srange(None, 7, '(]')),
+            (srange(None, 6, '()'), srange(6, 7, '(]'), [srange(None, 6, '()'), srange(6, 7, '(]')]),
+            (srange(None, 6, '(]'), srange(6, 7, '()'), srange(None, 7, '()')),
+            (srange(None, 6, '()'), srange(6, 7, '()'), [srange(None, 6, '()'), srange(6, 7, '()')]),
+            (srange(5, 6, '[]'), srange(6, None, '[)'), srange(5, None, '[)')),
+            (srange(5, 6, '[)'), srange(6, None, '[)'), srange(5, None, '[)')),
+            (srange(5, 6, '(]'), srange(6, None, '[)'), srange(5, None, '()')),
+            (srange(5, 6, '()'), srange(6, None, '[)'), srange(5, None, '()')),
+            (srange(5, 6, '[]'), srange(6, None, '()'), srange(5, None, '[)')),
+            (srange(5, 6, '[)'), srange(6, None, '()'), [srange(5, 6, '[)'), srange(6, None, '()')]),
+            (srange(5, 6, '(]'), srange(6, None, '()'), srange(5, None, '()')),
+            (srange(5, 6, '()'), srange(6, None, '()'), [srange(5, 6, '()'), srange(6, None, '()')]),
+            (srange(None, 6, '(]'), srange(6, None, '[)'), srange(None, None, '()')),
+            (srange(None, 6, '()'), srange(6, None, '[)'), srange(None, None, '()')),
+            (srange(None, 6, '(]'), srange(6, None, '()'), srange(None, None, '()')),
+            (srange(None, 6, '()'), srange(6, None, '()'), [srange(None, 6, '()'), srange(6, None, '()')]),
             # 単レンジ同士で一方ともう一方に共通部分がないパターン
             (srange(5, 6, '[]'), srange(7, 8, '[]'), [srange(5, 6, '[]'), srange(7, 8, '[]')]),
             (srange(5, 6, '[)'), srange(7, 8, '[]'), [srange(5, 6, '[)'), srange(7, 8, '[]')]),
@@ -176,6 +242,26 @@ class TestSetRangeClass:
             (srange(5, 6, '[)'), srange(7, 8, '()'), [srange(5, 6, '[)'), srange(7, 8, '()')]),
             (srange(5, 6, '(]'), srange(7, 8, '()'), [srange(5, 6, '(]'), srange(7, 8, '()')]),
             (srange(5, 6, '()'), srange(7, 8, '()'), [srange(5, 6, '()'), srange(7, 8, '()')]),
+            (srange(None, 6, '(]'), srange(7, 8, '[]'), [srange(None, 6, '(]'), srange(7, 8, '[]')]),
+            (srange(None, 6, '()'), srange(7, 8, '[]'), [srange(None, 6, '()'), srange(7, 8, '[]')]),
+            (srange(None, 6, '(]'), srange(7, 8, '[)'), [srange(None, 6, '(]'), srange(7, 8, '[)')]),
+            (srange(None, 6, '()'), srange(7, 8, '[)'), [srange(None, 6, '()'), srange(7, 8, '[)')]),
+            (srange(None, 6, '(]'), srange(7, 8, '(]'), [srange(None, 6, '(]'), srange(7, 8, '(]')]),
+            (srange(None, 6, '()'), srange(7, 8, '(]'), [srange(None, 6, '()'), srange(7, 8, '(]')]),
+            (srange(None, 6, '(]'), srange(7, 8, '()'), [srange(None, 6, '(]'), srange(7, 8, '()')]),
+            (srange(None, 6, '()'), srange(7, 8, '()'), [srange(None, 6, '()'), srange(7, 8, '()')]),
+            (srange(5, 6, '[]'), srange(7, None, '[)'), [srange(5, 6, '[]'), srange(7, None, '[)')]),
+            (srange(5, 6, '[)'), srange(7, None, '[)'), [srange(5, 6, '[)'), srange(7, None, '[)')]),
+            (srange(5, 6, '(]'), srange(7, None, '[)'), [srange(5, 6, '(]'), srange(7, None, '[)')]),
+            (srange(5, 6, '()'), srange(7, None, '[)'), [srange(5, 6, '()'), srange(7, None, '[)')]),
+            (srange(5, 6, '[]'), srange(7, None, '()'), [srange(5, 6, '[]'), srange(7, None, '()')]),
+            (srange(5, 6, '[)'), srange(7, None, '()'), [srange(5, 6, '[)'), srange(7, None, '()')]),
+            (srange(5, 6, '(]'), srange(7, None, '()'), [srange(5, 6, '(]'), srange(7, None, '()')]),
+            (srange(5, 6, '()'), srange(7, None, '()'), [srange(5, 6, '()'), srange(7, None, '()')]),
+            (srange(None, 6, '(]'), srange(7, None, '[)'), [srange(None, 6, '(]'), srange(7, None, '[)')]),
+            (srange(None, 6, '()'), srange(7, None, '[)'), [srange(None, 6, '()'), srange(7, None, '[)')]),
+            (srange(None, 6, '(]'), srange(7, None, '()'), [srange(None, 6, '(]'), srange(7, None, '()')]),
+            (srange(None, 6, '()'), srange(7, None, '()'), [srange(None, 6, '()'), srange(7, None, '()')]),
             # 単レンジ同士で一方ともう一方にシングルトンでない共通部分があるパターン
             (srange(5, 7, '[]'), srange(6, 8, '[]'), srange(5, 8, '[]')),
             (srange(5, 7, '[)'), srange(6, 8, '[]'), srange(5, 8, '[]')),
@@ -193,8 +279,27 @@ class TestSetRangeClass:
             (srange(5, 7, '[)'), srange(6, 8, '()'), srange(5, 8, '[)')),
             (srange(5, 7, '(]'), srange(6, 8, '()'), srange(5, 8, '()')),
             (srange(5, 7, '()'), srange(6, 8, '()'), srange(5, 8, '()')),
+            (srange(None, 7, '(]'), srange(6, 8, '[]'), srange(None, 8, '(]')),
+            (srange(None, 7, '()'), srange(6, 8, '[]'), srange(None, 8, '(]')),
+            (srange(None, 7, '(]'), srange(6, 8, '[)'), srange(None, 8, '()')),
+            (srange(None, 7, '()'), srange(6, 8, '[)'), srange(None, 8, '()')),
+            (srange(None, 7, '(]'), srange(6, 8, '(]'), srange(None, 8, '(]')),
+            (srange(None, 7, '()'), srange(6, 8, '(]'), srange(None, 8, '(]')),
+            (srange(None, 7, '(]'), srange(6, 8, '()'), srange(None, 8, '()')),
+            (srange(None, 7, '()'), srange(6, 8, '()'), srange(None, 8, '()')),
+            (srange(5, None, '[)'), srange(6, 8, '[]'), srange(5, None, '[)')),
+            (srange(5, None, '()'), srange(6, 8, '[]'), srange(5, None, '()')),
+            (srange(5, None, '[)'), srange(6, 8, '[)'), srange(5, None, '[)')),
+            (srange(5, None, '()'), srange(6, 8, '[)'), srange(5, None, '()')),
+            (srange(5, None, '[)'), srange(6, 8, '(]'), srange(5, None, '[)')),
+            (srange(5, None, '()'), srange(6, 8, '(]'), srange(5, None, '()')),
+            (srange(5, None, '[)'), srange(6, 8, '()'), srange(5, None, '[)')),
+            (srange(5, None, '()'), srange(6, 8, '()'), srange(5, None, '()')),
             # 一方が空のパターン
             (srange(5, 6, '[]'), srange(empty=True), srange(5, 6, '[]')),
+            (srange(None, 6, '(]'), srange(empty=True), srange(None, 6, '(]')),
+            (srange(5, None, '[)'), srange(empty=True), srange(5, None, '[)')),
+            (srange(None, None, '()'), srange(empty=True), srange(None, None, '()')),
             (srange(empty=True), srange(empty=True), srange(empty=True)),
             # 一方が単レンジでないパターン
             (srange(4, 6, '[]') + srange(8, 10, '[]'), srange(3, 5, '[]'), [srange(3, 6, '[]'), srange(8, 10, '[]')]),
@@ -330,6 +435,26 @@ class TestSetRangeClass:
             (srange(5, 10, '[)'), srange(7, 9, '()'), srange(7, 9, '()')),
             (srange(5, 10, '(]'), srange(7, 9, '()'), srange(7, 9, '()')),
             (srange(5, 10, '()'), srange(7, 9, '()'), srange(7, 9, '()')),
+            (srange(None, 10, '(]'), srange(7, 9, '[]'), srange(7, 9, '[]')),
+            (srange(None, 10, '()'), srange(7, 9, '[]'), srange(7, 9, '[]')),
+            (srange(None, 10, '(]'), srange(7, 9, '[)'), srange(7, 9, '[)')),
+            (srange(None, 10, '()'), srange(7, 9, '[)'), srange(7, 9, '[)')),
+            (srange(None, 10, '(]'), srange(7, 9, '(]'), srange(7, 9, '(]')),
+            (srange(None, 10, '()'), srange(7, 9, '(]'), srange(7, 9, '(]')),
+            (srange(None, 10, '(]'), srange(7, 9, '()'), srange(7, 9, '()')),
+            (srange(None, 10, '()'), srange(7, 9, '()'), srange(7, 9, '()')),
+            (srange(5, None, '[)'), srange(7, 9, '[]'), srange(7, 9, '[]')),
+            (srange(5, None, '()'), srange(7, 9, '[]'), srange(7, 9, '[]')),
+            (srange(5, None, '[)'), srange(7, 9, '[)'), srange(7, 9, '[)')),
+            (srange(5, None, '()'), srange(7, 9, '[)'), srange(7, 9, '[)')),
+            (srange(5, None, '[)'), srange(7, 9, '(]'), srange(7, 9, '(]')),
+            (srange(5, None, '()'), srange(7, 9, '(]'), srange(7, 9, '(]')),
+            (srange(5, None, '[)'), srange(7, 9, '()'), srange(7, 9, '()')),
+            (srange(5, None, '()'), srange(7, 9, '()'), srange(7, 9, '()')),
+            (srange(None, None, '()'), srange(7, 9, '[]'), srange(7, 9, '[]')),
+            (srange(None, None, '()'), srange(7, 9, '[)'), srange(7, 9, '[)')),
+            (srange(None, None, '()'), srange(7, 9, '(]'), srange(7, 9, '(]')),
+            (srange(None, None, '()'), srange(7, 9, '()'), srange(7, 9, '()')),
             # 共通部分が無いパターン (ただしオペランドが空の単レンジでない)
             (srange(5, 6, '[]'), srange(7, 9, '[]'), srange(empty=True)),
             (srange(5, 6, '[)'), srange(7, 9, '[]'), srange(empty=True)),
@@ -347,15 +472,36 @@ class TestSetRangeClass:
             (srange(5, 6, '[)'), srange(7, 9, '()'), srange(empty=True)),
             (srange(5, 6, '(]'), srange(7, 9, '()'), srange(empty=True)),
             (srange(5, 6, '()'), srange(7, 9, '()'), srange(empty=True)),
+            (srange(None, 6, '(]'), srange(7, 9, '[]'), srange(empty=True)),
+            (srange(None, 6, '()'), srange(7, 9, '[]'), srange(empty=True)),
+            (srange(None, 6, '(]'), srange(7, 9, '[)'), srange(empty=True)),
+            (srange(None, 6, '()'), srange(7, 9, '[)'), srange(empty=True)),
+            (srange(None, 6, '(]'), srange(7, 9, '(]'), srange(empty=True)),
+            (srange(None, 6, '()'), srange(7, 9, '(]'), srange(empty=True)),
+            (srange(None, 6, '(]'), srange(7, 9, '()'), srange(empty=True)),
+            (srange(None, 6, '()'), srange(7, 9, '()'), srange(empty=True)),
+            (srange(5, 6, '[]'), srange(7, None, '[)'), srange(empty=True)),
+            (srange(5, 6, '[)'), srange(7, None, '[)'), srange(empty=True)),
+            (srange(5, 6, '(]'), srange(7, None, '[)'), srange(empty=True)),
+            (srange(5, 6, '()'), srange(7, None, '[)'), srange(empty=True)),
+            (srange(5, 6, '[]'), srange(7, None, '()'), srange(empty=True)),
+            (srange(5, 6, '[)'), srange(7, None, '()'), srange(empty=True)),
+            (srange(5, 6, '(]'), srange(7, None, '()'), srange(empty=True)),
+            (srange(5, 6, '()'), srange(7, None, '()'), srange(empty=True)),
+            (srange(None, 6, '(]'), srange(7, None, '[)'), srange(empty=True)),
+            (srange(None, 6, '()'), srange(7, None, '[)'), srange(empty=True)),
+            (srange(None, 6, '(]'), srange(7, None, '()'), srange(empty=True)),
+            (srange(None, 6, '()'), srange(7, None, '()'), srange(empty=True)),
             # 少なくとも一方が空の単レンジであるパターン
             (srange(empty=True), srange(7, 9, '[]'), srange(empty=True)),
             (srange(empty=True), srange(7, 9, '[)'), srange(empty=True)),
             (srange(empty=True), srange(7, 9, '(]'), srange(empty=True)),
             (srange(empty=True), srange(7, 9, '()'), srange(empty=True)),
             (srange(empty=True), srange(empty=True), srange(empty=True)),
-            (srange(empty=True), srange(empty=True), srange(empty=True)),
-            (srange(empty=True), srange(empty=True), srange(empty=True)),
-            (srange(empty=True), srange(empty=True), srange(empty=True)),
+            (srange(empty=True), srange(None, 9, '(]'), srange(empty=True)),
+            (srange(empty=True), srange(None, 9, '()'), srange(empty=True)),
+            (srange(empty=True), srange(7, None, '[)'), srange(empty=True)),
+            (srange(empty=True), srange(7, None, '()'), srange(empty=True)),
             # 共通部分があり、それがいずれのオペランドとも一致しないパターン
             (srange(5, 9, '[]'), srange(7, 12, '[]'), srange(7, 9, '[]')),
             (srange(5, 9, '[)'), srange(7, 12, '[]'), srange(7, 9, '[)')),
