@@ -1,11 +1,31 @@
-from typing import TypeVar
+from typing import TypeVar, Optional, overload
 
 from ._range_class import construct_unit, SetRange
 
 T = TypeVar('T')
 
 
-def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
+@overload
+def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False):
+    ...
+
+
+@overload
+def srange(start: None = None, end: T = None, edge: str = '()', empty: bool = False) -> SetRange[T]:
+    ...
+
+
+@overload
+def srange(start: T = None, end: None = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
+    ...
+
+
+@overload
+def srange(start: None = None, end: None = None, edge: str = '()', empty: bool = False) -> SetRange[T]:
+    ...
+
+
+def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
     # TODO: start, end が None である場合の処理
 
     if empty:
