@@ -378,6 +378,10 @@ class SetRange(Generic[T]):
         bool
             other のすべての要素が含まれれば True、そうでない場合は False。
         """
+        if isinstance(other, SetRange):
+            return self + other == self
+        else:
+            raise TypeError(f'unsupported argument type for {type(self)}.issuperset: \'{type(other)}\'')
 
     @property
     def is_empty(self) -> bool:
