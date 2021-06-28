@@ -348,6 +348,10 @@ class SetRange(Generic[T]):
         bool
             すべての要素が other に含まれれば True、そうでない場合は False。
         """
+        if isinstance(other, SetRange):
+            return self + other == other
+        else:
+            raise TypeError(f'unsupported argument type for {type(self)}.issubset: \'{type(other)}\'')
 
     @property
     def is_empty(self) -> bool:
