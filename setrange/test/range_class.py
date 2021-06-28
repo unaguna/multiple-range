@@ -571,5 +571,9 @@ class TestSetRangeClass:
     def test__srange_unit_int__issubset(self, srange1: SetRange, srange2: SetRange, expected_issubset: bool):
         """レンジ[int]()の包含判定をテストする。
         """
-        assert srange1.issubset(srange2) == expected_issubset
-        assert (srange1 <= srange2) == expected_issubset
+        if expected_issubset:
+            assert srange1.issubset(srange2)
+            assert srange1 <= srange2
+        else:
+            assert not srange1.issubset(srange2)
+            assert not srange1 <= srange2
