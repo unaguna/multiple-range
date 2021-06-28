@@ -345,7 +345,7 @@ class SetRange(Generic[T]):
         try:
             return self != other and self.issubset(other)
         except TypeError:
-            raise TypeError(f'unsupported operand type(s) for <=: \'{type(self)}\' and \'{type(other)}\'')
+            raise TypeError(f'unsupported operand type(s) for <: \'{type(self)}\' and \'{type(other)}\'')
 
     def __ge__(self, other):
         try:
