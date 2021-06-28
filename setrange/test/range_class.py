@@ -575,13 +575,18 @@ class TestSetRangeClass:
             assert srange1.issubset(srange2)
             assert srange2.issuperset(srange1)
             assert srange1 <= srange2
+            assert srange2 >= srange1
 
             if srange1 == srange2:
                 assert not srange1 < srange2
+                assert not srange2 > srange1
             else:
                 assert srange1 < srange2
+                assert srange2 > srange1
         else:
             assert not srange1.issubset(srange2)
             assert not srange2.issuperset(srange1)
             assert not srange1 <= srange2
+            assert not srange2 >= srange1
             assert not srange1 < srange2
+            assert not srange2 > srange1
