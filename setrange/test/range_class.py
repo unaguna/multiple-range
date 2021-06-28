@@ -572,3 +572,4 @@ class TestSetRangeClass:
         """レンジ[int]()の包含判定をテストする。
         """
         assert srange1.issubset(srange2) == expected_issubset
+        assert (srange1 <= srange2) == expected_issubset

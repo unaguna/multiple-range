@@ -335,6 +335,12 @@ class SetRange(Generic[T]):
         else:
             raise TypeError(f'unsupported operand type(s) for *: \'{type(self)}\' and \'{type(other)}\'')
 
+    def __le__(self, other):
+        try:
+            return self.issubset(other)
+        except TypeError:
+            raise TypeError(f'unsupported operand type(s) for <=: \'{type(self)}\' and \'{type(other)}\'')
+
     def issubset(self, other) -> bool:
         """すべての要素が other に含まれるか判定する。
 
