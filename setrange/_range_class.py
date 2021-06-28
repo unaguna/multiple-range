@@ -286,7 +286,7 @@ class SetRange(Generic[T]):
 
                     # 統合後の区間を left に入れたことで、非標準系になりうるので標準化
                     while l_index + 1 < len(left_unit_list):
-                        tmp_unit = _sum_units(left_unit_list[l_index], left_unit_list[l_index+1])
+                        tmp_unit = _sum_units(left_unit_list[l_index], left_unit_list[l_index + 1])
                         if tmp_unit is None:
                             break
                         else:
@@ -334,6 +334,20 @@ class SetRange(Generic[T]):
             return SetRange(*result_unit_list)
         else:
             raise TypeError(f'unsupported operand type(s) for *: \'{type(self)}\' and \'{type(other)}\'')
+
+    def issubset(self, other) -> bool:
+        """すべての要素が other に含まれるか判定する。
+
+        Parameters
+        ----------
+        other: SetRange
+            判定対象の SetRange。
+
+        Returns
+        -------
+        bool
+            すべての要素が other に含まれれば True、そうでない場合は False。
+        """
 
     @property
     def is_empty(self) -> bool:

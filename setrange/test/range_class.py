@@ -534,3 +534,41 @@ class TestSetRangeClass:
         """
         assert srange1 * srange2 == srange_m
         assert srange2 * srange1 == srange_m
+
+    @pytest.mark.parametrize('srange1, srange2, expected_issubset', (
+            (srange(5, 10), srange(0, 20), True),
+            (srange(5, 10), srange(5, 20), True),
+            (srange(5, 10), srange(0, 10), True),
+            (srange(5, 10), srange(5, 10), True),
+            (srange(0, 10, '[]'), srange(0, 10, '[]'), True),
+            (srange(0, 10, '(]'), srange(0, 10, '[]'), True),
+            (srange(0, 10, '[)'), srange(0, 10, '[]'), True),
+            (srange(0, 10, '()'), srange(0, 10, '[]'), True),
+            (srange(0, 10, '[]'), srange(0, 10, '(]'), False),
+            (srange(0, 10, '(]'), srange(0, 10, '(]'), True),
+            (srange(0, 10, '[)'), srange(0, 10, '(]'), False),
+            (srange(0, 10, '()'), srange(0, 10, '(]'), True),
+            (srange(0, 10, '[]'), srange(0, 10, '[)'), False),
+            (srange(0, 10, '(]'), srange(0, 10, '[)'), False),
+            (srange(0, 10, '[)'), srange(0, 10, '[)'), True),
+            (srange(0, 10, '()'), srange(0, 10, '[)'), True),
+            (srange(0, 10, '[]'), srange(0, 10, '()'), False),
+            (srange(0, 10, '(]'), srange(0, 10, '()'), False),
+            (srange(0, 10, '[)'), srange(0, 10, '()'), False),
+            (srange(0, 10, '()'), srange(0, 10, '()'), True),
+            (srange(empty=True), srange(0, 10), True),
+            (srange(0, 10), srange(empty=True), False),
+            (srange(), srange(0, 10), False),
+            (srange(0, 10), srange(), True),
+            (srange(empty=True), srange(), True),
+            (srange(), srange(empty=True), False),
+            (srange(0, 10, '[]') + srange(20, 30), srange(0, 30, '[]'), True),
+            (srange(0, 10, '[]') + srange(20, 30), srange(5, 25, '[]'), False),
+            (srange(0, 10, '[]') + srange(20, 30), srange(0, 11) + srange(18, 35), True),
+            (srange(0, 10, '[]') + srange(20, 30), srange(0, 11) + srange(25, 27), False),
+            (srange(0, 10, '[]') + srange(20, 30), srange(0, 9) + srange(18, 35), False),
+    ))
+    def test__srange_unit_int__issubset(self, srange1: SetRange, srange2: SetRange, expected_issubset: bool):
+        """レンジ[int]()の包含判定をテストする。
+        """
+        assert srange1.issubset(srange2) == expected_issubset
