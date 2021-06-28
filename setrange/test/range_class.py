@@ -573,6 +573,7 @@ class TestSetRangeClass:
         """
         if expected_issubset:
             assert srange1.issubset(srange2)
+            assert srange2.issuperset(srange1)
             assert srange1 <= srange2
 
             if srange1 == srange2:
@@ -581,5 +582,6 @@ class TestSetRangeClass:
                 assert srange1 < srange2
         else:
             assert not srange1.issubset(srange2)
+            assert not srange2.issuperset(srange1)
             assert not srange1 <= srange2
             assert not srange1 < srange2

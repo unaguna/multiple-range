@@ -365,6 +365,20 @@ class SetRange(Generic[T]):
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issubset: \'{type(other)}\'')
 
+    def issuperset(self, other) -> bool:
+        """other のすべての要素が含まれるか判定する。
+
+        Parameters
+        ----------
+        other: SetRange
+            判定対象の SetRange。
+
+        Returns
+        -------
+        bool
+            other のすべての要素が含まれれば True、そうでない場合は False。
+        """
+
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
