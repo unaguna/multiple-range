@@ -261,7 +261,10 @@ class SetRange(Generic[T]):
             return '∪'.join(map(str, self._unit_list))
 
     def __repr__(self):
-        return ' + '.join(map(repr, self._unit_list))
+        if self.is_empty:
+            return 'srange(empty=True)'
+        else:
+            return ' + '.join(map(repr, self._unit_list))
 
     def __bool__(self):
         return not self.is_empty
