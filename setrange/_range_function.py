@@ -7,7 +7,7 @@ T = TypeVar('T')
 
 
 @overload
-def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False):
+def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False, singleton: T = None):
     ...
 
 
@@ -26,7 +26,7 @@ def srange(start: None = None, end: None = None, edge: str = '()', empty: bool =
     ...
 
 
-def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
+def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)', empty: bool = False, singleton: T = None) -> SetRange[T]:
     """srange インスタンスを作成する。
 
     この関数では数学的な意味での『区間』に相当するインスタンスが作成される。
@@ -49,6 +49,9 @@ def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)',
         ただし、ここでいう含むとは集合における含有 (∈) の意味であり、python の演算子 in で判定されるものである。
     empty: bool
         True を指定すると空集合に相当するレンジが作成される。このとき、他の引数は無視される。
+    singleton
+        None 以外の値を指定すると、その値のみを含む区間が作成される。このとき、他の引数は無視される。
+        ただし、引数 empty が True である場合はこの引数が無視されて空集合に相当するレンジが作成される。
 
     Returns
     -------
