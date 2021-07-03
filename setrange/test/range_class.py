@@ -637,6 +637,7 @@ class TestSetRangeClass:
             (srange(1, 5, edge='[)'), 4),
             (srange(1, 5, edge='(]'), 4),
             (srange(1, 5, edge='()'), 4),
+            (srange(empty=True), 0),
             (srange(1, 5, edge='()') + srange(9, 11, edge='()'), 6),
     ))
     def test__srange_unit_int__measure(self, srange1: SetRange, measure):
