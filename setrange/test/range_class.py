@@ -621,6 +621,7 @@ class TestSetRangeClass:
             (srange(None, 5, edge='()'), False, True),
             (srange(1, None, edge='()'), True, False),
             (srange(None, None, edge='()'), False, False),
+            (srange(empty=True), True, True),
             (srange(1, 5, edge='[]') + srange(7, 10, edge='[]'), True, True),
             (srange(None, 5, edge='[]') + srange(7, 10, edge='[]'), False, True),
             (srange(1, 5, edge='[]') + srange(7, None, edge='[]'), True, False),
