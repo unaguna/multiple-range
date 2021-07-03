@@ -395,6 +395,15 @@ class SetRange(Generic[T]):
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issuperset: \'{type(other)}\'')
 
+    def is_bounded_below(self) -> bool:
+        """下に有界であるかどうかを返す
+        """
+
+    def is_bounded_above(self) -> bool:
+        """上に有界であるかどうかを返す
+        """
+
+
     def complement(self):
         """補集合である SetRange を作成して返す。
 
