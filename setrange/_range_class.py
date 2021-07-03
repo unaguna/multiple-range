@@ -145,6 +145,8 @@ def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> 
     SetRangeUnit[T]
         構成したインスタンス。空集合となる場合は None。
     """
+    if start == MaxEndPoint() or end == MinEndPoint():
+        return None
     if include_start and not include_end:
         if start < end:
             return SetRangeUnitIE(start, end)
@@ -421,6 +423,25 @@ class SetRange(Generic[T]):
         SetRange
             このインスタンスの補集合
         """
+        # 戻り値となる SetRange の _unit_list
+        complement_unit_list = []
+
+        # このインスタンスの各 SetRangeUnit に左から接する SetRangeUnit を作って戻り値の SetRange を構成する unit とする。
+        next_start = MinEndPoint()
+        next_include_start = False
+        for unit in self._unit_list:
+            complement_unit_list.append(construct_unit(next_start,
+                                                       unit.start,
+                                                       next_include_start,
+                                                       not unit.include_start))
+            next_start = unit.end
+            next_include_start = not unit.include_end
+
+        # 上のループでは、最後の SetRangeUnit に右から接する SetRangeUnit を作っていないため、作る。
+        complement_unit_list.append(construct_unit(next_start, MaxEndPoint(), next_include_start, False))
+
+        # 上のループで (-inf,inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
+        return SetRange(*filter(lambda u: u is not None, complement_unit_list))
 
     @property
     def is_empty(self) -> bool:
