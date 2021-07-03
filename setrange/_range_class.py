@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic, List, Optional
 
+from ._range_end_point import MinEndPoint, MaxEndPoint
+
 T = TypeVar('T')
 
 
@@ -398,11 +400,18 @@ class SetRange(Generic[T]):
     def is_bounded_below(self) -> bool:
         """下に有界であるかどうかを返す
         """
+        if self.is_empty:
+            return True
+        else:
+            return self._unit_list[0].start != MinEndPoint()
 
     def is_bounded_above(self) -> bool:
         """上に有界であるかどうかを返す
         """
-
+        if self.is_empty:
+            return True
+        else:
+            return self._unit_list[-1].end != MaxEndPoint()
 
     def complement(self):
         """補集合である SetRange を作成して返す。
