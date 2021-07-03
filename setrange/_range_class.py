@@ -248,6 +248,9 @@ class SetRange(Generic[T]):
         else:
             return False
 
+    def __hash__(self):
+        return hash(tuple(self._unit_list))
+
     def __str__(self):
         if self.is_empty:
             return '(empty)'
