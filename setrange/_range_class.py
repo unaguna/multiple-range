@@ -49,6 +49,9 @@ class SetRangeUnit(Generic[T], ABC):
     def is_empty(self) -> bool:
         ...
 
+    def measure(self):
+        return self.end - self.start
+
 
 class SetRangeUnitII(SetRangeUnit[T]):
 
@@ -443,6 +446,29 @@ class SetRange(Generic[T]):
 
         # 上のループで (-inf,inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
         return SetRange(*filter(lambda u: u is not None, complement_unit_list))
+
+    def measure(self):
+        """レンジの長さを返す。
+
+        長さの計算は - 演算によって行い、複数のレンジの長さの和は + 演算によって行われる。
+        ただし、空のレンジである場合は整数値の 0 を返し、レンジが有界でない場合は ValueError を raise する。
+
+        Returns
+        -------
+        any
+            このレンジの長さ。
+
+        Raises
+        ------
+        ValueError
+            このインスタンスが上下に有界でない場合
+        """
+        if self.is_empty:
+            return 0
+        elif self.is_bounded_below() and self.is_bounded_above():
+            return sum(map(lambda u: u.measure(), self._unit_list[1:]), self._unit_list[0].measure())
+        else:
+            raise ValueError('The SetRange is not bounded.')
 
     @property
     def is_empty(self) -> bool:

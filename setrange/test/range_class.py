@@ -631,3 +631,30 @@ class TestSetRangeClass:
         """
         assert srange1.is_bounded_below() == bounded_below
         assert srange1.is_bounded_above() == bounded_above
+
+    @pytest.mark.parametrize('srange1, measure', (
+            (srange(1, 5, edge='[]'), 4),
+            (srange(1, 5, edge='[)'), 4),
+            (srange(1, 5, edge='(]'), 4),
+            (srange(1, 5, edge='()'), 4),
+            (srange(empty=True), 0),
+            (srange(1, 5, edge='()') + srange(9, 11, edge='()'), 6),
+    ))
+    def test__srange_unit_int__measure(self, srange1: SetRange, measure):
+        """レンジ[int]()の測度関数をテストする。
+        """
+        assert srange1.measure() == measure
+
+    @pytest.mark.parametrize('srange1', (
+            srange(1, None),
+            srange(None, 5),
+            srange(None, None),
+            srange(1, 2) + srange(5, None),
+            srange(None, 2) + srange(5, 10),
+            srange(None, 2) + srange(5, None),
+    ))
+    def test__srange_unit_int__measure_err(self, srange1: SetRange):
+        """レンジ[int]()の測度関数をテストする。
+        """
+        with pytest.raises(ValueError):
+            srange1.measure()
