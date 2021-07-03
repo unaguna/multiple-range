@@ -245,8 +245,6 @@ class SetRange(Generic[T]):
     def __eq__(self, other):
         if isinstance(other, SetRange):
             return self._unit_list == other._unit_list
-        elif isinstance(other, SetRangeUnit):
-            return self == SetRange(other)
         else:
             return False
 
