@@ -444,6 +444,15 @@ class SetRange(Generic[T]):
         # 上のループで (-inf,inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
         return SetRange(*filter(lambda u: u is not None, complement_unit_list))
 
+    def measure(self):
+        """レンジの長さを返す。
+
+        Raises
+        ------
+        ValueError
+            このインスタンスが上下に有界でない場合
+        """
+
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
