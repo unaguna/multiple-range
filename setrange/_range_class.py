@@ -315,7 +315,7 @@ class SetRange(Generic[T]):
             return SetRange(*result_unit_list)
 
         else:
-            raise TypeError(f'unsupported operand type(s) for +: \'{type(self)}\' and \'{type(other)}\'')
+            return NotImplemented
 
     def __mul__(self, other):
         """集合論における交叉演算
@@ -341,31 +341,31 @@ class SetRange(Generic[T]):
             result_unit_list = filter(lambda u: u is not None, map(lambda u: _mul_units(u, other), self._unit_list))
             return SetRange(*result_unit_list)
         else:
-            raise TypeError(f'unsupported operand type(s) for *: \'{type(self)}\' and \'{type(other)}\'')
+            return NotImplemented
 
     def __le__(self, other):
         try:
             return self.issubset(other)
         except TypeError:
-            raise TypeError(f'unsupported operand type(s) for <=: \'{type(self)}\' and \'{type(other)}\'')
+            return NotImplemented
 
     def __lt__(self, other):
         try:
             return self != other and self.issubset(other)
         except TypeError:
-            raise TypeError(f'unsupported operand type(s) for <: \'{type(self)}\' and \'{type(other)}\'')
+            return NotImplemented
 
     def __ge__(self, other):
         try:
             return self.issuperset(other)
         except TypeError:
-            raise TypeError(f'unsupported operand type(s) for >=: \'{type(self)}\' and \'{type(other)}\'')
+            return NotImplemented
 
     def __gt__(self, other):
         try:
             return self != other and self.issuperset(other)
         except TypeError:
-            raise TypeError(f'unsupported operand type(s) for >: \'{type(self)}\' and \'{type(other)}\'')
+            return NotImplemented
 
     def issubset(self, other) -> bool:
         """すべての要素が other に含まれるか判定する。
