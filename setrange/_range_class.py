@@ -395,6 +395,15 @@ class SetRange(Generic[T]):
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issuperset: \'{type(other)}\'')
 
+    def complement(self):
+        """補集合である SetRange を作成して返す。
+
+        Returns
+        -------
+        SetRange
+            このインスタンスの補集合
+        """
+
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0

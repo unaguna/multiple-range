@@ -590,3 +590,23 @@ class TestSetRangeClass:
             assert not srange2 >= srange1
             assert not srange1 < srange2
             assert not srange2 > srange1
+
+    @pytest.mark.parametrize('srange1, srange2', (
+            (srange(1, 5, edge='[]'), srange(None, 1, edge='()') + srange(5, None, edge='()')),
+            (srange(1, 5, edge='[)'), srange(None, 1, edge='()') + srange(5, None, edge='[)')),
+            (srange(1, 5, edge='(]'), srange(None, 1, edge='(]') + srange(5, None, edge='()')),
+            (srange(1, 5, edge='()'), srange(None, 1, edge='(]') + srange(5, None, edge='[)')),
+            (srange(1, 5, edge='[]') + srange(10, 15, edge='[]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='()') + srange(15, None, edge='()')),
+            (srange(1, 5, edge='[]') + srange(10, 15, edge='(]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='(]') + srange(15, None, edge='()')),
+            (srange(1, 5, edge='[)') + srange(10, 15, edge='[]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='[)') + srange(15, None, edge='()')),
+            (srange(1, 5, edge='[)') + srange(10, 15, edge='(]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='[]') + srange(15, None, edge='()')),
+    ))
+    def test__srange_unit_int__complement(self, srange1: SetRange, srange2: SetRange):
+        """レンジ[int]()の補集合をテストする。
+        """
+        assert srange1.complement() == srange2
+        assert srange2.complement() == srange1
