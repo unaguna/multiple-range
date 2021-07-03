@@ -62,6 +62,9 @@ def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)',
     if empty:
         return SetRange()
 
+    if singleton is not None:
+        return SetRange(construct_unit(singleton, singleton, True, True))
+
     if start is None:
         start = MinEndPoint()
         include_start = False
