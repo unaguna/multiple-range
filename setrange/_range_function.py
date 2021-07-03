@@ -26,7 +26,11 @@ def srange(start: None = None, end: None = None, edge: str = '()', empty: bool =
     ...
 
 
-def srange(start: Optional[T] = None, end: Optional[T] = None, edge: str = '[)', empty: bool = False, singleton: T = None) -> SetRange[T]:
+def srange(start: Optional[T] = None,
+           end: Optional[T] = None,
+           edge: str = '[)',
+           empty: bool = False,
+           singleton: T = None) -> SetRange[T]:
     """srange インスタンスを作成する。
 
     この関数では数学的な意味での『区間』に相当するインスタンスが作成される。
