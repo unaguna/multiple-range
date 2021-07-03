@@ -74,6 +74,8 @@ class TestSetRangeClass:
         if expected_equal:
             assert set_range_1 == set_range_2
             assert set_range_2 == set_range_1
+            assert hash(set_range_1) == hash(set_range_2)
+            assert hash(set_range_2) == hash(set_range_1)
         else:
             assert set_range_1 != set_range_2
             assert set_range_2 != set_range_1

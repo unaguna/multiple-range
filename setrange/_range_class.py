@@ -245,10 +245,11 @@ class SetRange(Generic[T]):
     def __eq__(self, other):
         if isinstance(other, SetRange):
             return self._unit_list == other._unit_list
-        elif isinstance(other, SetRangeUnit):
-            return self == SetRange(other)
         else:
             return False
+
+    def __hash__(self):
+        return hash(tuple(self._unit_list))
 
     def __str__(self):
         if self.is_empty:
