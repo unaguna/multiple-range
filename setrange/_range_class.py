@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic, List, Optional
 
+from ._range_end_point import MinEndPoint, MaxEndPoint
+
 T = TypeVar('T')
 
 
@@ -143,6 +145,8 @@ def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> 
     SetRangeUnit[T]
         構成したインスタンス。空集合となる場合は None。
     """
+    if start == MaxEndPoint() or end == MinEndPoint():
+        return None
     if include_start and not include_end:
         if start < end:
             return SetRangeUnitIE(start, end)
@@ -394,6 +398,50 @@ class SetRange(Generic[T]):
             return self + other == self
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issuperset: \'{type(other)}\'')
+
+    def is_bounded_below(self) -> bool:
+        """下に有界であるかどうかを返す
+        """
+        if self.is_empty:
+            return True
+        else:
+            return self._unit_list[0].start != MinEndPoint()
+
+    def is_bounded_above(self) -> bool:
+        """上に有界であるかどうかを返す
+        """
+        if self.is_empty:
+            return True
+        else:
+            return self._unit_list[-1].end != MaxEndPoint()
+
+    def complement(self):
+        """補集合である SetRange を作成して返す。
+
+        Returns
+        -------
+        SetRange
+            このインスタンスの補集合
+        """
+        # 戻り値となる SetRange の _unit_list
+        complement_unit_list = []
+
+        # このインスタンスの各 SetRangeUnit に左から接する SetRangeUnit を作って戻り値の SetRange を構成する unit とする。
+        next_start = MinEndPoint()
+        next_include_start = False
+        for unit in self._unit_list:
+            complement_unit_list.append(construct_unit(next_start,
+                                                       unit.start,
+                                                       next_include_start,
+                                                       not unit.include_start))
+            next_start = unit.end
+            next_include_start = not unit.include_end
+
+        # 上のループでは、最後の SetRangeUnit に右から接する SetRangeUnit を作っていないため、作る。
+        complement_unit_list.append(construct_unit(next_start, MaxEndPoint(), next_include_start, False))
+
+        # 上のループで (-inf,inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
+        return SetRange(*filter(lambda u: u is not None, complement_unit_list))
 
     @property
     def is_empty(self) -> bool:

@@ -590,3 +590,42 @@ class TestSetRangeClass:
             assert not srange2 >= srange1
             assert not srange1 < srange2
             assert not srange2 > srange1
+
+    @pytest.mark.parametrize('srange1, srange2', (
+            (srange(1, 5, edge='[]'), srange(None, 1, edge='()') + srange(5, None, edge='()')),
+            (srange(1, 5, edge='[)'), srange(None, 1, edge='()') + srange(5, None, edge='[)')),
+            (srange(1, 5, edge='(]'), srange(None, 1, edge='(]') + srange(5, None, edge='()')),
+            (srange(1, 5, edge='()'), srange(None, 1, edge='(]') + srange(5, None, edge='[)')),
+            (srange(1, 5, edge='[]') + srange(10, 15, edge='[]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='()') + srange(15, None, edge='()')),
+            (srange(1, 5, edge='[]') + srange(10, 15, edge='(]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='(]') + srange(15, None, edge='()')),
+            (srange(1, 5, edge='[)') + srange(10, 15, edge='[]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='[)') + srange(15, None, edge='()')),
+            (srange(1, 5, edge='[)') + srange(10, 15, edge='(]'),
+             srange(None, 1, edge='()') + srange(5, 10, edge='[]') + srange(15, None, edge='()')),
+    ))
+    def test__srange_unit_int__complement(self, srange1: SetRange, srange2: SetRange):
+        """レンジ[int]()の補集合をテストする。
+        """
+        assert srange1.complement() == srange2
+        assert srange2.complement() == srange1
+
+    @pytest.mark.parametrize('srange1, bounded_below, bounded_above', (
+            (srange(1, 5, edge='[]'), True, True),
+            (srange(1, 5, edge='[)'), True, True),
+            (srange(1, 5, edge='(]'), True, True),
+            (srange(1, 5, edge='()'), True, True),
+            (srange(None, 5, edge='()'), False, True),
+            (srange(1, None, edge='()'), True, False),
+            (srange(None, None, edge='()'), False, False),
+            (srange(1, 5, edge='[]') + srange(7, 10, edge='[]'), True, True),
+            (srange(None, 5, edge='[]') + srange(7, 10, edge='[]'), False, True),
+            (srange(1, 5, edge='[]') + srange(7, None, edge='[]'), True, False),
+            (srange(None, 5, edge='[]') + srange(7, None, edge='[]'), False, False),
+    ))
+    def test__srange_unit_int__bound(self, srange1: SetRange, bounded_below, bounded_above):
+        """レンジ[int]()の有界判定をテストする。
+        """
+        assert srange1.is_bounded_below() == bounded_below
+        assert srange1.is_bounded_above() == bounded_above
