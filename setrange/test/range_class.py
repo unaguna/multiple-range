@@ -598,6 +598,7 @@ class TestSetRangeClass:
             (srange(1, 5, edge='[)'), srange(None, 1, edge='()') + srange(5, None, edge='[)')),
             (srange(1, 5, edge='(]'), srange(None, 1, edge='(]') + srange(5, None, edge='()')),
             (srange(1, 5, edge='()'), srange(None, 1, edge='(]') + srange(5, None, edge='[)')),
+            (srange(empty=True), srange(None, None)),
             (srange(1, 5, edge='[]') + srange(10, 15, edge='[]'),
              srange(None, 1, edge='()') + srange(5, 10, edge='()') + srange(15, None, edge='()')),
             (srange(1, 5, edge='[]') + srange(10, 15, edge='(]'),
@@ -606,6 +607,11 @@ class TestSetRangeClass:
              srange(None, 1, edge='()') + srange(5, 10, edge='[)') + srange(15, None, edge='()')),
             (srange(1, 5, edge='[)') + srange(10, 15, edge='(]'),
              srange(None, 1, edge='()') + srange(5, 10, edge='[]') + srange(15, None, edge='()')),
+            (srange(None, 5, edge='()') + srange(5, None, edge='()'), srange(5, 5, edge='[]')),
+            (srange(1, 5, edge='()') + srange(5, None, edge='()'),
+             srange(None, 1, edge='(]') + srange(5, 5, edge='[]')),
+            (srange(None, 5, edge='()') + srange(5, 10, edge='()'),
+             srange(5, 5, edge='[]') + srange(10, None, edge='[)')),
     ))
     def test__srange_unit_int__complement(self, srange1: SetRange, srange2: SetRange):
         """レンジ[int]()の補集合をテストする。
@@ -621,6 +627,7 @@ class TestSetRangeClass:
             (srange(None, 5, edge='()'), False, True),
             (srange(1, None, edge='()'), True, False),
             (srange(None, None, edge='()'), False, False),
+            (srange(empty=True), True, True),
             (srange(1, 5, edge='[]') + srange(7, 10, edge='[]'), True, True),
             (srange(None, 5, edge='[]') + srange(7, 10, edge='[]'), False, True),
             (srange(1, 5, edge='[]') + srange(7, None, edge='[]'), True, False),
