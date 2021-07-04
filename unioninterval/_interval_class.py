@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic, List, Optional
 
-from ._range_end_point import MinEndPoint, MaxEndPoint
+from ._interval_endpoint import MinEndPoint, MaxEndPoint
 
 T = TypeVar('T')
 

@@ -1,7 +1,7 @@
 from typing import TypeVar, Optional, overload
 
-from ._range_class import construct_unit, SetRange
-from ._range_end_point import MinEndPoint, MaxEndPoint
+from ._interval_class import construct_unit, SetRange
+from ._interval_endpoint import MinEndPoint, MaxEndPoint
 
 T = TypeVar('T')
 
