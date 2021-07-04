@@ -774,7 +774,7 @@ class TestUnionIntervalClass:
     def test__interval__iteration(self, intervals: Sequence[UnionInterval]):
         """UnionInterval の Iterableとしての挙動をテストする
         """
-        interval1 = sum(intervals, interval(empty=True))
+        interval1: UnionInterval = sum(intervals, interval(empty=True))
         assert isinstance(interval1, Iterable)
         assert list(interval1) == list(intervals)
         for i in range(len(intervals)):
