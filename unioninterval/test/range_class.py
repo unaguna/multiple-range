@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from setrange import srange, SetRange
+from unioninterval import srange, SetRange
 
 
 class TestSetRangeClass:
