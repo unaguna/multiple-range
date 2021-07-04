@@ -770,6 +770,7 @@ class TestUnionIntervalClass:
         (interval(1, 3),),
         (interval(singleton=5),),
         (interval(1, 3), interval(5, 7)),
+        (interval(1, 3), interval(5, 7), interval(10, 15)),
     ))
     def test__interval__iteration(self, intervals: Sequence[UnionInterval]):
         """UnionInterval の Iterableとしての挙動をテストする
@@ -778,6 +779,12 @@ class TestUnionIntervalClass:
         assert isinstance(interval1, Iterable)
         assert list(interval1) == list(intervals)
         for i in range(len(intervals)):
+            assert isinstance(interval1[i], UnionInterval)
             assert interval1[i] == intervals[i]
         for i in range(len(intervals)):
+            assert isinstance(interval1[-i], UnionInterval)
             assert interval1[-i] == intervals[-i]
+        if len(intervals) >= 2:
+            interval2: UnionInterval = sum(intervals[1:], interval(empty=True))
+            assert isinstance(interval1[1:], UnionInterval)
+            assert interval1[1:] == interval2
