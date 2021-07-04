@@ -445,7 +445,7 @@ class UnionInterval(Generic[T]):
         # 上のループでは、最後の Interval に右から接する Interval を作っていないため、作る。
         complement_unit_list.append(construct_unit(next_start, MaxEndPoint(), next_include_start, False))
 
-        # 上のループで (-inf,inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
+        # 上のループで (-inf,-inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
         return UnionInterval(*filter(lambda u: u is not None, complement_unit_list))
 
     def measure(self):
