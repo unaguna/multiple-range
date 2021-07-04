@@ -449,15 +449,15 @@ class UnionInterval(Generic[T]):
         return UnionInterval(*filter(lambda u: u is not None, complement_unit_list))
 
     def measure(self, *, zero=0):
-        """レンジの長さを返す。
+        """UnionInterval の長さを返す。
 
-        長さの計算は - 演算によって行い、複数のレンジの長さの和は + 演算によって行われる。
-        ただし、空のレンジである場合は zero に指定した値を返し、レンジが有界でない場合は ValueError を raise する。
+        長さの計算は - 演算によって行い、複数の Interval の長さの和は + 演算によって行われる。
+        ただし、空集合である場合は zero に指定した値を返し、UnionInterval が有界でない場合は ValueError を raise する。
 
         Parameters
         ----------
         zero
-            空集合の測度として出力する値
+            空集合の長さとして出力する値
 
         Returns
         -------
