@@ -1,12 +1,12 @@
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic, List, Optional
 
-from ._range_end_point import MinEndPoint, MaxEndPoint
+from ._interval_endpoint import MinEndPoint, MaxEndPoint
 
 T = TypeVar('T')
 
 
-class SetRangeUnit(Generic[T], ABC):
+class Interval(Generic[T], ABC):
     start: T
     include_start: bool
     end: T
@@ -17,7 +17,7 @@ class SetRangeUnit(Generic[T], ABC):
         ...
 
     def __eq__(self, other):
-        if isinstance(other, SetRangeUnit):
+        if isinstance(other, Interval):
             if self.is_empty and other.is_empty:
                 return True
             else:
@@ -25,20 +25,20 @@ class SetRangeUnit(Generic[T], ABC):
                        self.end == other.end and \
                        self.include_start == other.include_start and \
                        self.include_end == other.include_end
-        elif isinstance(other, SetRange):
-            return SetRange(self) == other
+        elif isinstance(other, UnionInterval):
+            return UnionInterval(self) == other
         else:
             return False
 
     def __hash__(self):
-        return hash(('SetRangeUnit', self.start, self.end, self.include_start, self.include_end))
+        return hash(('Interval', self.start, self.end, self.include_start, self.include_end))
 
     @abstractmethod
     def __str__(self):
         ...
 
     def __repr__(self):
-        return f'srange({self.start}, {self.end}, ' \
+        return f'interval({self.start}, {self.end}, ' \
                f'\'{"[" if self.include_start else "("}{"]" if self.include_end else ")"}\')'
 
     def __bool__(self):
@@ -53,7 +53,7 @@ class SetRangeUnit(Generic[T], ABC):
         return self.end - self.start
 
 
-class SetRangeUnitII(SetRangeUnit[T]):
+class IntervalII(Interval[T]):
 
     def __init__(self, start: T, end: T):
         self.start = start
@@ -72,7 +72,7 @@ class SetRangeUnitII(SetRangeUnit[T]):
         return False
 
 
-class SetRangeUnitIE(SetRangeUnit[T]):
+class IntervalIE(Interval[T]):
 
     def __init__(self, start: T, end: T):
         self.start = start
@@ -91,7 +91,7 @@ class SetRangeUnitIE(SetRangeUnit[T]):
         return False
 
 
-class SetRangeUnitEI(SetRangeUnit[T]):
+class IntervalEI(Interval[T]):
 
     def __init__(self, start: T, end: T):
         self.start = start
@@ -110,7 +110,7 @@ class SetRangeUnitEI(SetRangeUnit[T]):
         return False
 
 
-class SetRangeUnitEE(SetRangeUnit[T]):
+class IntervalEE(Interval[T]):
 
     def __init__(self, start: T, end: T):
         self.start = start
@@ -129,8 +129,8 @@ class SetRangeUnitEE(SetRangeUnit[T]):
         return False
 
 
-def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> Optional[SetRangeUnit[T]]:
-    """SetRangeUnit を継承したインスタンスを作成する。
+def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> Optional[Interval[T]]:
+    """Interval を継承したインスタンスを作成する。
 
     Parameters
     ----------
@@ -145,37 +145,37 @@ def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> 
 
     Returns
     -------
-    SetRangeUnit[T]
+    Interval[T]
         構成したインスタンス。空集合となる場合は None。
     """
     if include_start and not include_end:
         if start < end:
-            return SetRangeUnitIE(start, end)
+            return IntervalIE(start, end)
         else:
             return None
     elif include_start and include_end:
         if start <= end:
-            return SetRangeUnitII(start, end)
+            return IntervalII(start, end)
         else:
             return None
     elif not include_start and include_end:
         if start < end:
-            return SetRangeUnitEI(start, end)
+            return IntervalEI(start, end)
         else:
             return None
     elif not include_start and not include_end:
         if start < end:
-            return SetRangeUnitEE(start, end)
+            return IntervalEE(start, end)
         else:
             return None
 
 
-def _sum_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUnit[T]]:
+def _sum_units(e1: Interval[T], e2: Interval[T]) -> Optional[Interval[T]]:
     """2つのレンジの合併がレンジである場合に、その合併を返す。
 
     Returns
     -------
-    SetRangeUnit[T]
+    Interval[T]
         2つのレンジの合併がレンジである場合は合併。そうでない場合は None。
     """
     if e1.start > e2.start or (e1.start == e2.start and e2.include_start):
@@ -198,12 +198,12 @@ def _sum_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUni
                           include_end=end_point.include_end)
 
 
-def _mul_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUnit[T]]:
+def _mul_units(e1: Interval[T], e2: Interval[T]) -> Optional[Interval[T]]:
     """2つのレンジの交叉を返す。
 
     Returns
     -------
-    SetRangeUnit[T]
+    Interval[T]
         2つのレンジの交叉が空集合でない場合は交叉。空集合である場合は None。
     """
     if e1.start > e2.start or (e1.start == e2.start and e2.include_start):
@@ -226,10 +226,10 @@ def _mul_units(e1: SetRangeUnit[T], e2: SetRangeUnit[T]) -> Optional[SetRangeUni
                           include_end=end_point.include_end)
 
 
-class SetRange(Generic[T]):
-    _unit_list: List[SetRangeUnit[T]]
+class UnionInterval(Generic[T]):
+    _unit_list: List[Interval[T]]
 
-    def __init__(self, *units: SetRangeUnit[T]):
+    def __init__(self, *units: Interval[T]):
         # 引数に与えられた unit のリストは以下の条件を満たさなければならない。
         # ・unit 同士は共通部分を持たない
         # ・空の unit が含まれない
@@ -244,7 +244,7 @@ class SetRange(Generic[T]):
             return False
 
     def __eq__(self, other):
-        if isinstance(other, SetRange):
+        if isinstance(other, UnionInterval):
             return self._unit_list == other._unit_list
         else:
             return False
@@ -260,7 +260,7 @@ class SetRange(Generic[T]):
 
     def __repr__(self):
         if self.is_empty:
-            return 'srange(empty=True)'
+            return 'interval(empty=True)'
         else:
             return ' + '.join(map(repr, self._unit_list))
 
@@ -272,9 +272,9 @@ class SetRange(Generic[T]):
 
         Returns
         -------
-        SetRange[T]
+        UnionInterval[T]
         """
-        if isinstance(other, SetRange):
+        if isinstance(other, UnionInterval):
             result_unit_list = list()
             left_unit_list = list(self._unit_list)
             right_unit_list = list(other._unit_list)
@@ -313,7 +313,7 @@ class SetRange(Generic[T]):
             result_unit_list.extend(left_unit_list[l_index:])
             result_unit_list.extend(right_unit_list[r_index:])
 
-            return SetRange(*result_unit_list)
+            return UnionInterval(*result_unit_list)
 
         else:
             return NotImplemented
@@ -323,24 +323,24 @@ class SetRange(Generic[T]):
 
         Returns
         -------
-        SetRange[T]
+        UnionInterval[T]
         """
-        if isinstance(other, SetRange):
+        if isinstance(other, UnionInterval):
             # 分配法則 (a+b)*(c+d) = (a+b)*c + (a+b)*d を使用する。
             unit_list_r = list(other._unit_list)
 
-            result = SetRange()
+            result = UnionInterval()
             for set_range in map(lambda u: self * u, unit_list_r):
                 result += set_range
 
             return result
-        elif isinstance(other, SetRangeUnit):
-            # SetRange 同士の積の演算の中で SetRange * SetRangeUnit がよばれるため、この分岐が必要。
+        elif isinstance(other, Interval):
+            # UnionInterval 同士の積の演算の中で UnionInterval * Interval がよばれるため、この分岐が必要。
 
             # 分配法則 (a+b)*c = a*c + b*c を使用する。
             # c をかけることで a, b の順序が逆転したり共通部分が生じたりすることはないため、改めて標準化する必要はない。
             result_unit_list = filter(lambda u: u is not None, map(lambda u: _mul_units(u, other), self._unit_list))
-            return SetRange(*result_unit_list)
+            return UnionInterval(*result_unit_list)
         else:
             return NotImplemented
 
@@ -373,15 +373,15 @@ class SetRange(Generic[T]):
 
         Parameters
         ----------
-        other: SetRange
-            判定対象の SetRange。
+        other: UnionInterval
+            判定対象の UnionInterval。
 
         Returns
         -------
         bool
             すべての要素が other に含まれれば True、そうでない場合は False。
         """
-        if isinstance(other, SetRange):
+        if isinstance(other, UnionInterval):
             return self + other == other
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issubset: \'{type(other)}\'')
@@ -391,15 +391,15 @@ class SetRange(Generic[T]):
 
         Parameters
         ----------
-        other: SetRange
-            判定対象の SetRange。
+        other: UnionInterval
+            判定対象の UnionInterval。
 
         Returns
         -------
         bool
             other のすべての要素が含まれれば True、そうでない場合は False。
         """
-        if isinstance(other, SetRange):
+        if isinstance(other, UnionInterval):
             return self + other == self
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issuperset: \'{type(other)}\'')
@@ -421,17 +421,17 @@ class SetRange(Generic[T]):
             return self._unit_list[-1].end != MaxEndPoint()
 
     def complement(self):
-        """補集合である SetRange を作成して返す。
+        """補集合である UnionInterval を作成して返す。
 
         Returns
         -------
-        SetRange
+        UnionInterval
             このインスタンスの補集合
         """
-        # 戻り値となる SetRange の _unit_list
+        # 戻り値となる UnionInterval の _unit_list
         complement_unit_list = []
 
-        # このインスタンスの各 SetRangeUnit に左から接する SetRangeUnit を作って戻り値の SetRange を構成する unit とする。
+        # このインスタンスの各 Interval に左から接する Interval を作って戻り値の UnionInterval を構成する unit とする。
         next_start = MinEndPoint()
         next_include_start = False
         for unit in self._unit_list:
@@ -442,11 +442,11 @@ class SetRange(Generic[T]):
             next_start = unit.end
             next_include_start = not unit.include_end
 
-        # 上のループでは、最後の SetRangeUnit に右から接する SetRangeUnit を作っていないため、作る。
+        # 上のループでは、最後の Interval に右から接する Interval を作っていないため、作る。
         complement_unit_list.append(construct_unit(next_start, MaxEndPoint(), next_include_start, False))
 
-        # 上のループで (-inf,inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
-        return SetRange(*filter(lambda u: u is not None, complement_unit_list))
+        # 上のループで (-inf,-inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
+        return UnionInterval(*filter(lambda u: u is not None, complement_unit_list))
 
     def measure(self):
         """レンジの長さを返す。
@@ -469,7 +469,7 @@ class SetRange(Generic[T]):
         elif self.is_bounded_below() and self.is_bounded_above():
             return sum(map(lambda u: u.measure(), self._unit_list[1:]), self._unit_list[0].measure())
         else:
-            raise ValueError('The SetRange is not bounded.')
+            raise ValueError('The UnionInterval is not bounded.')
 
     @property
     def is_empty(self) -> bool:

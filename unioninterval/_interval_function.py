@@ -1,37 +1,37 @@
 from typing import TypeVar, Optional, overload
 
-from ._range_class import construct_unit, SetRange
-from ._range_end_point import MinEndPoint, MaxEndPoint
+from ._interval_class import construct_unit, UnionInterval
+from ._interval_endpoint import MinEndPoint, MaxEndPoint
 
 T = TypeVar('T')
 
 
 @overload
-def srange(start: T = None, end: T = None, edge: str = '[)', empty: bool = False, singleton: T = None):
+def interval(start: T = None, end: T = None, edge: str = '[)', empty: bool = False, singleton: T = None):
     ...
 
 
 @overload
-def srange(start: None = None, end: T = None, edge: str = '()', empty: bool = False) -> SetRange[T]:
+def interval(start: None = None, end: T = None, edge: str = '()', empty: bool = False) -> UnionInterval[T]:
     ...
 
 
 @overload
-def srange(start: T = None, end: None = None, edge: str = '[)', empty: bool = False) -> SetRange[T]:
+def interval(start: T = None, end: None = None, edge: str = '[)', empty: bool = False) -> UnionInterval[T]:
     ...
 
 
 @overload
-def srange(start: None = None, end: None = None, edge: str = '()', empty: bool = False) -> SetRange[T]:
+def interval(start: None = None, end: None = None, edge: str = '()', empty: bool = False) -> UnionInterval[T]:
     ...
 
 
-def srange(start: Optional[T] = None,
-           end: Optional[T] = None,
-           edge: str = '[)',
-           empty: bool = False,
-           singleton: T = None) -> SetRange[T]:
-    """srange インスタンスを作成する。
+def interval(start: Optional[T] = None,
+             end: Optional[T] = None,
+             edge: str = '[)',
+             empty: bool = False,
+             singleton: T = None) -> UnionInterval[T]:
+    """interval インスタンスを作成する。
 
     この関数では数学的な意味での『区間』に相当するインスタンスが作成される。
 
@@ -59,15 +59,15 @@ def srange(start: Optional[T] = None,
 
     Returns
     -------
-    SetRange
+    UnionInterval
         作成されたレンジ
     """
 
     if empty:
-        return SetRange()
+        return UnionInterval()
 
     if singleton is not None:
-        return SetRange(construct_unit(singleton, singleton, True, True))
+        return UnionInterval(construct_unit(singleton, singleton, True, True))
 
     if start is None:
         start = MinEndPoint()
@@ -91,6 +91,6 @@ def srange(start: Optional[T] = None,
 
     unit = construct_unit(start, end, include_start, include_end)
     if unit is not None:
-        return SetRange(unit)
+        return UnionInterval(unit)
     else:
-        return SetRange()
+        return UnionInterval()
