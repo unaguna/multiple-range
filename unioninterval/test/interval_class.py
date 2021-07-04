@@ -740,6 +740,16 @@ class TestUnionIntervalClass:
         """
         assert interval1.measure() == measure
 
+    @pytest.mark.parametrize('zero', (
+        0,
+        0.0,
+        timedelta(0),
+    ))
+    def test__interval_unit__measure__zero(self, zero):
+        """空の interval の測度関数をテストする。
+        """
+        assert interval(empty=True).measure(zero=zero) == zero
+
     @pytest.mark.parametrize('interval1', (
             interval(1, None),
             interval(None, 5),
