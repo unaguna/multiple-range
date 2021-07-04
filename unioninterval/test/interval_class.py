@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Iterable
 
 import pytest
 
@@ -763,3 +764,15 @@ class TestUnionIntervalClass:
         """
         with pytest.raises(ValueError):
             interval1.measure()
+
+    @pytest.mark.parametrize('intervals', (
+        tuple(),
+        (interval(1, 3),),
+        (interval(singleton=5),),
+        (interval(1, 3), interval(5, 7)),
+    ))
+    def test__interval__iteration(self, intervals: Iterable[UnionInterval]):
+        """UnionInterval の Iterableとしての挙動をテストする
+        """
+        interval1 = sum(intervals, interval(empty=True))
+        assert list(interval1) == list(intervals)
