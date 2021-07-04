@@ -5,7 +5,7 @@ import pytest
 from unioninterval import interval, UnionInterval
 
 
-class TestSetRangeClass:
+class TestUnionIntervalClass:
 
     @pytest.mark.parametrize('set_range', (
             interval(empty=True),
@@ -16,8 +16,8 @@ class TestSetRangeClass:
             interval('f', 's'),
             interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
     ))
-    def test__srange_unit__type(self, set_range):
-        """srange関数の戻り値の型をテストする
+    def test__interval_unit__type(self, set_range):
+        """interval関数の戻り値の型をテストする
         """
         assert isinstance(set_range, UnionInterval)
 
@@ -40,7 +40,7 @@ class TestSetRangeClass:
         (interval(None, None, edge='(]'), '(-inf, inf)'),
         (interval(None, None, edge='()'), '(-inf, inf)'),
     ))
-    def test__srange_unit_int__str(self, set_range, expected_str):
+    def test__interval_unit_int__str(self, set_range, expected_str):
         """単レンジ[int]の文字列化をテストする。
         """
         assert str(set_range) == expected_str
@@ -79,7 +79,7 @@ class TestSetRangeClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
          interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 34)), False),
     ))
-    def test__srange_unit__equal(self, set_range_1, set_range_2, expected_equal):
+    def test__interval_unit__equal(self, set_range_1, set_range_2, expected_equal):
         """単レンジの等号演算をテストする。
         """
         if expected_equal:
@@ -171,7 +171,7 @@ class TestSetRangeClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), None),
          datetime(2100, 12, 30, 11, 22, 33), True),
     ))
-    def test__srange_unit__contain(self, set_range, element, expected_contain):
+    def test__interval_unit__contain(self, set_range, element, expected_contain):
         """単レンジの含有演算をテストする。
 
         端点と比較できるオブジェクトであれば、含有するかどうか確かめられる。
@@ -219,7 +219,7 @@ class TestSetRangeClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '(]'), True),
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '()'), True),
     ))
-    def test__srange_unit_empty__start_g_end(self, target, is_empty):
+    def test__interval_unit_empty__start_g_end(self, target, is_empty):
         """端点の指定次第で単レンジが空になることをテストする。
         """
         assert target.is_empty == is_empty
@@ -232,7 +232,7 @@ class TestSetRangeClass:
             assert target != interval(empty=True)
             assert target
 
-    @pytest.mark.parametrize('srange1, srange2, srange_m', (
+    @pytest.mark.parametrize('interval1, interval2, interval_m', (
         # 単レンジ同士で一方の終点ともう一方の始点が一致するパターン
         (interval(5, 6, '[]'), interval(6, 7, '[]'), interval(5, 7, '[]')),
         (interval(5, 6, '[)'), interval(6, 7, '[]'), interval(5, 7, '[]')),
@@ -485,25 +485,25 @@ class TestSetRangeClass:
         (interval(1, 6, '[]') + interval(8, 10, '[]'), interval(2, 3, '[]') + interval(4, 7, '[]'),
          [interval(1, 7, '[]'), interval(8, 10, '[]')]),
     ))
-    def test__srange_unit_int__add__unit(self, srange1, srange2, srange_m):
+    def test__interval_unit_int__add__unit(self, interval1, interval2, interval_m):
         """レンジ[int]()の加法演算 (合併) をテストする。
         """
-        if isinstance(srange_m, list):
-            result = srange2 + srange1
+        if isinstance(interval_m, list):
+            result = interval2 + interval1
             assert not result.is_empty
-            assert result._unit_list == srange_m
+            assert result._unit_list == interval_m
 
-            result = srange1 + srange2
+            result = interval1 + interval2
             assert not result.is_empty
-            assert result._unit_list == srange_m
+            assert result._unit_list == interval_m
         else:
-            result = srange2 + srange1
-            assert result == srange_m
+            result = interval2 + interval1
+            assert result == interval_m
 
-            result = srange1 + srange2
-            assert result == srange_m
+            result = interval1 + interval2
+            assert result == interval_m
 
-    @pytest.mark.parametrize('srange1, srange2, srange_m', (
+    @pytest.mark.parametrize('interval1, interval2, interval_m', (
         # 一方が他方を包含するパターン
         (interval(5, 10, '[]'), interval(7, 9, '[]'), interval(7, 9, '[]')),
         (interval(5, 10, '[)'), interval(7, 9, '[]'), interval(7, 9, '[]')),
@@ -615,13 +615,13 @@ class TestSetRangeClass:
          interval(7, 8, '()') + interval(9, 10, '(]') + interval(15, 18, '[)')),
         (interval(5, 10, '(]') + interval(15, 20, '[)'), interval(empty=True), interval(empty=True)),
     ))
-    def test__srange_unit_int__mul(self, srange1, srange2, srange_m):
+    def test__interval_unit_int__mul(self, interval1, interval2, interval_m):
         """レンジ[int]()の乗法演算 (交叉) をテストする。
         """
-        assert srange1 * srange2 == srange_m
-        assert srange2 * srange1 == srange_m
+        assert interval1 * interval2 == interval_m
+        assert interval2 * interval1 == interval_m
 
-    @pytest.mark.parametrize('srange1, srange2, expected_issubset', (
+    @pytest.mark.parametrize('interval1, interval2, expected_issubset', (
         (interval(5, 10), interval(0, 20), True),
         (interval(5, 10), interval(5, 20), True),
         (interval(5, 10), interval(0, 10), True),
@@ -654,30 +654,31 @@ class TestSetRangeClass:
         (interval(0, 10, '[]') + interval(20, 30), interval(0, 11) + interval(25, 27), False),
         (interval(0, 10, '[]') + interval(20, 30), interval(0, 9) + interval(18, 35), False),
     ))
-    def test__srange_unit_int__issubset(self, srange1: UnionInterval, srange2: UnionInterval, expected_issubset: bool):
+    def test__interval_unit_int__issubset(self,
+                                          interval1: UnionInterval, interval2: UnionInterval, expected_issubset: bool):
         """レンジ[int]()の包含判定をテストする。
         """
         if expected_issubset:
-            assert srange1.issubset(srange2)
-            assert srange2.issuperset(srange1)
-            assert srange1 <= srange2
-            assert srange2 >= srange1
+            assert interval1.issubset(interval2)
+            assert interval2.issuperset(interval1)
+            assert interval1 <= interval2
+            assert interval2 >= interval1
 
-            if srange1 == srange2:
-                assert not srange1 < srange2
-                assert not srange2 > srange1
+            if interval1 == interval2:
+                assert not interval1 < interval2
+                assert not interval2 > interval1
             else:
-                assert srange1 < srange2
-                assert srange2 > srange1
+                assert interval1 < interval2
+                assert interval2 > interval1
         else:
-            assert not srange1.issubset(srange2)
-            assert not srange2.issuperset(srange1)
-            assert not srange1 <= srange2
-            assert not srange2 >= srange1
-            assert not srange1 < srange2
-            assert not srange2 > srange1
+            assert not interval1.issubset(interval2)
+            assert not interval2.issuperset(interval1)
+            assert not interval1 <= interval2
+            assert not interval2 >= interval1
+            assert not interval1 < interval2
+            assert not interval2 > interval1
 
-    @pytest.mark.parametrize('srange1, srange2', (
+    @pytest.mark.parametrize('interval1, interval2', (
         (interval(1, 5, edge='[]'), interval(None, 1, edge='()') + interval(5, None, edge='()')),
         (interval(1, 5, edge='[)'), interval(None, 1, edge='()') + interval(5, None, edge='[)')),
         (interval(1, 5, edge='(]'), interval(None, 1, edge='(]') + interval(5, None, edge='()')),
@@ -697,13 +698,13 @@ class TestSetRangeClass:
         (interval(None, 5, edge='()') + interval(5, 10, edge='()'),
          interval(5, 5, edge='[]') + interval(10, None, edge='[)')),
     ))
-    def test__srange_unit_int__complement(self, srange1: UnionInterval, srange2: UnionInterval):
+    def test__interval_unit_int__complement(self, interval1: UnionInterval, interval2: UnionInterval):
         """レンジ[int]()の補集合をテストする。
         """
-        assert srange1.complement() == srange2
-        assert srange2.complement() == srange1
+        assert interval1.complement() == interval2
+        assert interval2.complement() == interval1
 
-    @pytest.mark.parametrize('srange1, bounded_below, bounded_above', (
+    @pytest.mark.parametrize('interval1, bounded_below, bounded_above', (
         (interval(1, 5, edge='[]'), True, True),
         (interval(1, 5, edge='[)'), True, True),
         (interval(1, 5, edge='(]'), True, True),
@@ -717,13 +718,13 @@ class TestSetRangeClass:
         (interval(1, 5, edge='[]') + interval(7, None, edge='[]'), True, False),
         (interval(None, 5, edge='[]') + interval(7, None, edge='[]'), False, False),
     ))
-    def test__srange_unit_int__bound(self, srange1: UnionInterval, bounded_below, bounded_above):
+    def test__interval_unit_int__bound(self, interval1: UnionInterval, bounded_below, bounded_above):
         """レンジ[int]()の有界判定をテストする。
         """
-        assert srange1.is_bounded_below() == bounded_below
-        assert srange1.is_bounded_above() == bounded_above
+        assert interval1.is_bounded_below() == bounded_below
+        assert interval1.is_bounded_above() == bounded_above
 
-    @pytest.mark.parametrize('srange1, measure', (
+    @pytest.mark.parametrize('interval1, measure', (
         (interval(1, 5, edge='[]'), 4),
         (interval(1, 5, edge='[)'), 4),
         (interval(1, 5, edge='(]'), 4),
@@ -732,12 +733,12 @@ class TestSetRangeClass:
         (interval(1, 5, edge='()') + interval(9, 11, edge='()'), 6),
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[]'), timedelta(seconds=1)),
     ))
-    def test__srange_unit__measure(self, srange1: UnionInterval, measure):
+    def test__interval_unit__measure(self, interval1: UnionInterval, measure):
         """レンジ()の測度関数をテストする。
         """
-        assert srange1.measure() == measure
+        assert interval1.measure() == measure
 
-    @pytest.mark.parametrize('srange1', (
+    @pytest.mark.parametrize('interval1', (
             interval(1, None),
             interval(None, 5),
             interval(None, None),
@@ -745,8 +746,8 @@ class TestSetRangeClass:
             interval(None, 2) + interval(5, 10),
             interval(None, 2) + interval(5, None),
     ))
-    def test__srange_unit__measure_err(self, srange1: UnionInterval):
+    def test__interval_unit__measure_err(self, interval1: UnionInterval):
         """レンジ()の測度関数をテストする。
         """
         with pytest.raises(ValueError):
-            srange1.measure()
+            interval1.measure()
