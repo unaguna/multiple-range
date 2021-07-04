@@ -731,7 +731,9 @@ class TestUnionIntervalClass:
         (interval(1, 5, edge='()'), 4),
         (interval(empty=True), 0),
         (interval(1, 5, edge='()') + interval(9, 11, edge='()'), 6),
+        (interval(singleton=1), 0),
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[]'), timedelta(seconds=1)),
+        (interval(singleton=datetime(2020, 12, 30, 11, 22, 33)), timedelta(seconds=0)),
     ))
     def test__interval_unit__measure(self, interval1: UnionInterval, measure):
         """レンジ()の測度関数をテストする。
