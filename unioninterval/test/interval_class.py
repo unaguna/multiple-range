@@ -775,4 +775,5 @@ class TestUnionIntervalClass:
         """UnionInterval の Iterableとしての挙動をテストする
         """
         interval1 = sum(intervals, interval(empty=True))
+        assert isinstance(interval1, Iterable)
         assert list(interval1) == list(intervals)
