@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Iterable
+from typing import Iterable, Sequence
 
 import pytest
 
@@ -771,9 +771,13 @@ class TestUnionIntervalClass:
         (interval(singleton=5),),
         (interval(1, 3), interval(5, 7)),
     ))
-    def test__interval__iteration(self, intervals: Iterable[UnionInterval]):
+    def test__interval__iteration(self, intervals: Sequence[UnionInterval]):
         """UnionInterval の Iterableとしての挙動をテストする
         """
         interval1 = sum(intervals, interval(empty=True))
         assert isinstance(interval1, Iterable)
         assert list(interval1) == list(intervals)
+        for i in range(len(intervals)):
+            assert interval1[i] == intervals[i]
+        for i in range(len(intervals)):
+            assert interval1[-i] == intervals[-i]
