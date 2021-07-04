@@ -267,6 +267,10 @@ class UnionInterval(Generic[T]):
     def __bool__(self):
         return not self.is_empty
 
+    def __iter__(self):
+        for unit in self._unit_list:
+            yield UnionInterval(unit)
+
     def __add__(self, other):
         """集合論における合併演算
 
