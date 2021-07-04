@@ -448,11 +448,16 @@ class UnionInterval(Generic[T]):
         # 上のループで (-inf,-inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
         return UnionInterval(*filter(lambda u: u is not None, complement_unit_list))
 
-    def measure(self):
+    def measure(self, *, zero=0):
         """レンジの長さを返す。
 
         長さの計算は - 演算によって行い、複数のレンジの長さの和は + 演算によって行われる。
-        ただし、空のレンジである場合は整数値の 0 を返し、レンジが有界でない場合は ValueError を raise する。
+        ただし、空のレンジである場合は zero に指定した値を返し、レンジが有界でない場合は ValueError を raise する。
+
+        Parameters
+        ----------
+        zero
+            空集合の測度として出力する値
 
         Returns
         -------
@@ -465,7 +470,7 @@ class UnionInterval(Generic[T]):
             このインスタンスが上下に有界でない場合
         """
         if self.is_empty:
-            return 0
+            return zero
         elif self.is_bounded_below() and self.is_bounded_above():
             return sum(map(lambda u: u.measure(), self._unit_list[1:]), self._unit_list[0].measure())
         else:
