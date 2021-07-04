@@ -272,7 +272,10 @@ class UnionInterval(Generic[T]):
             yield UnionInterval(unit)
 
     def __getitem__(self, item: int):
-        return UnionInterval(self._unit_list[item])
+        if isinstance(item, slice):
+            return UnionInterval(*self._unit_list[item])
+        else:
+            return UnionInterval(self._unit_list[item])
 
     def __add__(self, other):
         """集合論における合併演算
