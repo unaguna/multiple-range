@@ -130,7 +130,7 @@ class IntervalEE(Interval[T]):
 
 
 def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> Optional[Interval[T]]:
-    """SetRangeUnit を継承したインスタンスを作成する。
+    """Interval を継承したインスタンスを作成する。
 
     Parameters
     ----------
@@ -374,7 +374,7 @@ class UnionInterval(Generic[T]):
         Parameters
         ----------
         other: UnionInterval
-            判定対象の SetRange。
+            判定対象の UnionInterval。
 
         Returns
         -------
@@ -392,7 +392,7 @@ class UnionInterval(Generic[T]):
         Parameters
         ----------
         other: UnionInterval
-            判定対象の SetRange。
+            判定対象の UnionInterval。
 
         Returns
         -------
@@ -421,7 +421,7 @@ class UnionInterval(Generic[T]):
             return self._unit_list[-1].end != MaxEndPoint()
 
     def complement(self):
-        """補集合である SetRange を作成して返す。
+        """補集合である UnionInterval を作成して返す。
 
         Returns
         -------
