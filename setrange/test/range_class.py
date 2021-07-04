@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pytest
 
 from setrange import srange, SetRange
@@ -12,6 +14,7 @@ class TestSetRangeClass:
         srange(5, 10, edge='(]'),
         srange(5, 10, edge='()'),
         srange('f', 's'),
+        srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
     ))
     def test__srange_unit__type(self, set_range):
         """srange関数の戻り値の型をテストする
@@ -71,9 +74,13 @@ class TestSetRangeClass:
         (srange(empty=True), srange(empty=True, singleton=1), True),
         (srange(singleton=1), srange(1, 1, edge='[]'), True),
         (srange(singleton=1), srange(1, 2, edge='[]'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
+         srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
+         srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 34)), False),
     ))
-    def test__srange_unit_int__equal(self, set_range_1, set_range_2, expected_equal):
-        """単レンジ[int]の等号演算をテストする。
+    def test__srange_unit__equal(self, set_range_1, set_range_2, expected_equal):
+        """単レンジの等号演算をテストする。
         """
         if expected_equal:
             assert set_range_1 == set_range_2
@@ -143,6 +150,26 @@ class TestSetRangeClass:
         (srange('f', 's'), 'fa', True),
         (srange('f', 's'), 's', False),
         (srange('f', 's'), 'sa', False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(2020, 12, 30, 11, 22, 32), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(2020, 12, 30, 11, 22, 33), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(2020, 12, 31, 11, 22, 32), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(2020, 12, 31, 11, 22, 33), False),
+        (srange(None, datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(1900, 12, 30, 11, 22, 33), True),
+        (srange(None, datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(2020, 12, 31, 11, 22, 32), True),
+        (srange(None, datetime(2020, 12, 31, 11, 22, 33)),
+         datetime(2020, 12, 31, 11, 22, 33), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), None),
+         datetime(2020, 12, 30, 11, 22, 32), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), None),
+         datetime(2020, 12, 30, 11, 22, 33), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), None),
+         datetime(2100, 12, 30, 11, 22, 33), True),
     ))
     def test__srange_unit__contain(self, set_range, element, expected_contain):
         """単レンジの含有演算をテストする。
@@ -179,6 +206,18 @@ class TestSetRangeClass:
         (srange(None, None, '[)'), False),
         (srange(None, None, '(]'), False),
         (srange(None, None, '()'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[]'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[)'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '(]'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '()'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 33), '[]'), False),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 33), '[)'), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 33), '(]'), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 33), '()'), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '[]'), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '[)'), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '(]'), True),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '()'), True),
     ))
     def test__srange_unit_empty__start_g_end(self, target, is_empty):
         """端点の指定次第で単レンジが空になることをテストする。
@@ -650,9 +689,10 @@ class TestSetRangeClass:
         (srange(1, 5, edge='()'), 4),
         (srange(empty=True), 0),
         (srange(1, 5, edge='()') + srange(9, 11, edge='()'), 6),
+        (srange(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[]'), timedelta(seconds=1)),
     ))
-    def test__srange_unit_int__measure(self, srange1: SetRange, measure):
-        """レンジ[int]()の測度関数をテストする。
+    def test__srange_unit__measure(self, srange1: SetRange, measure):
+        """レンジ()の測度関数をテストする。
         """
         assert srange1.measure() == measure
 
@@ -664,8 +704,8 @@ class TestSetRangeClass:
         srange(None, 2) + srange(5, 10),
         srange(None, 2) + srange(5, None),
     ))
-    def test__srange_unit_int__measure_err(self, srange1: SetRange):
-        """レンジ[int]()の測度関数をテストする。
+    def test__srange_unit__measure_err(self, srange1: SetRange):
+        """レンジ()の測度関数をテストする。
         """
         with pytest.raises(ValueError):
             srange1.measure()
