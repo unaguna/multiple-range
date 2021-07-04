@@ -16,7 +16,7 @@ class MinEndPoint:
         return hash(self.__class__)
 
     def __lt__(self, other):
-        return True
+        return self != other
 
     def __le__(self, other):
         return True
@@ -52,7 +52,7 @@ class MaxEndPoint:
         return self == other
 
     def __gt__(self, other):
-        return True
+        return self != other
 
     def __ge__(self, other):
         return True

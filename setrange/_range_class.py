@@ -148,8 +148,6 @@ def construct_unit(start: T, end: T, include_start: bool, include_end: bool) -> 
     SetRangeUnit[T]
         構成したインスタンス。空集合となる場合は None。
     """
-    if start == MaxEndPoint() or end == MinEndPoint():
-        return None
     if include_start and not include_end:
         if start < end:
             return SetRangeUnitIE(start, end)
