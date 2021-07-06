@@ -277,6 +277,9 @@ class UnionInterval(Generic[T]):
         else:
             return UnionInterval(self._unit_list[item])
 
+    def __len__(self) -> int:
+        return len(self._unit_list)
+
     def __add__(self, other):
         """集合論における合併演算
 
@@ -489,7 +492,3 @@ class UnionInterval(Generic[T]):
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
-
-    @property
-    def unit_num(self) -> int:
-        return len(self._unit_list)
