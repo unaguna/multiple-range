@@ -267,6 +267,19 @@ class UnionInterval(Generic[T]):
     def __bool__(self):
         return not self.is_empty
 
+    def __iter__(self):
+        for unit in self._unit_list:
+            yield UnionInterval(unit)
+
+    def __getitem__(self, item: int):
+        if isinstance(item, slice):
+            return UnionInterval(*self._unit_list[item])
+        else:
+            return UnionInterval(self._unit_list[item])
+
+    def __len__(self) -> int:
+        return len(self._unit_list)
+
     def __add__(self, other):
         """集合論における合併演算
 
@@ -479,7 +492,3 @@ class UnionInterval(Generic[T]):
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
-
-    @property
-    def unit_num(self) -> int:
-        return len(self._unit_list)
