@@ -788,3 +788,20 @@ class TestUnionIntervalClass:
             interval2: UnionInterval = sum(intervals[1:], interval(empty=True))
             assert isinstance(interval1[1:], UnionInterval)
             assert interval1[1:] == interval2
+
+    @pytest.mark.parametrize('interval1, is_interval', (
+        (interval(empty=True), True),
+        (interval(1, 5, edge='[]'), True),
+        (interval(1, 5, edge='[)'), True),
+        (interval(1, 5, edge='(]'), True),
+        (interval(1, 5, edge='()'), True),
+        (interval(1, None), True),
+        (interval(None, 1), True),
+        (interval(1, 3) + interval(3, 4), True),
+        (interval(1, 2) + interval(3, 4), False),
+        (interval(1, 2) + interval(3, 4) + interval(5, 6), False),
+    ))
+    def test__interval__is_interval(self, interval1: UnionInterval, is_interval: bool):
+        """UnionInterval#is_interval のテスト
+        """
+        assert interval1.is_interval == is_interval

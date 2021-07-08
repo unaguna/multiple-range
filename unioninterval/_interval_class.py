@@ -492,3 +492,15 @@ class UnionInterval(Generic[T]):
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
+
+    @property
+    def is_interval(self) -> bool:
+        """数学的な区間であるかどうかを返す。
+
+        Returns
+        -------
+        bool
+            この UnionInterval が含むいかなる2点についてもその中点がこの UnionInterval に含まれるなら True。
+            そうでなければ False。
+        """
+        return len(self._unit_list) <= 1
