@@ -805,3 +805,24 @@ class TestUnionIntervalClass:
         """UnionInterval#is_interval のテスト
         """
         assert interval1.is_interval == is_interval
+
+    @pytest.mark.parametrize('interval1, inf, sup, min_v, max_v', (
+        (interval(empty=True), None, None, None, None),
+        (interval(1, 5, edge='[]'), 1, 5, 1, 5),
+        (interval(1, 5, edge='[)'), 1, 5, 1, None),
+        (interval(1, 5, edge='(]'), 1, 5, None, 5),
+        (interval(1, 5, edge='()'), 1, 5, None, None),
+        (interval(1, None), 1, None, 1, None),
+        (interval(None, 1), None, 1, None, None),
+        (interval(None, None), None, None, None, None),
+        (interval(1, 3) + interval(3, 4), 1, 4, 1, None),
+        (interval(1, 2) + interval(3, 4), 1, 4, 1, None),
+        (interval(1, 2) + interval(3, 4) + interval(5, 6), 1, 6, 1, None),
+    ))
+    def test__interval__min_max(self, interval1: UnionInterval, inf, sup, min_v, max_v):
+        """UnionInterval の最大値/最小値のテスト
+        """
+        assert interval1.inf() == inf
+        assert interval1.sup() == sup
+        assert interval1.min() == min_v
+        assert interval1.max() == max_v

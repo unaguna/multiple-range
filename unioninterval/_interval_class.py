@@ -504,3 +504,88 @@ class UnionInterval(Generic[T]):
             そうでなければ False。
         """
         return len(self._unit_list) <= 1
+
+    def inf(self) -> Optional[T]:
+        """下限を返す。
+
+        inf (sup) は min (max) と似ています。実際、ui がいかなる UnionInterval であっても、
+        inf (sup) と min (max) は次のように共通の性質を持ち、とくに min (max) が存在するとき inf (sup) も存在して
+        min == inf (max == sup) を満たします。
+        >>> from unioninterval as interval
+        >>> ui: UnionInterval # = ...
+        >>> if ui.min() is not None:
+        >>>     assert (ui * interval(None, ui.min(), edge='()')).is_empty
+        >>>     assert ui.min() == ui.inf()
+        >>> if ui.inf() is not None:
+        >>>     assert (ui * interval(None, ui.inf(), edge='()')).is_empty
+        >>> if ui.max() is not None:
+        >>>     assert (ui * interval(ui.max(), None, edge='()')).is_empty
+        >>>     assert ui.max() == ui.sup()
+        >>> if ui.sup() is not None:
+        >>>     assert (ui * interval(ui.sup(), None, edge='()')).is_empty
+
+        inf (sup) と min (max) の違いは、min のみ下記の性質も併せ持つという点です。
+        >>> from unioninterval as interval
+        >>> ui: UnionInterval # = ...
+        >>> if ui.min() is not None:
+        >>>     assert ui.min() in ui
+        >>> if ui.max() is not None:
+        >>>     assert ui.max() in ui
+        ただ境目が知りたいだけであればこの性質は不要かもしれません。そのような場合は inf (sup) を使用します。
+
+
+        Returns
+        -------
+        T
+            この UnionInterval の下限。この UnionInterval が空であるか下に有界でない場合は None。
+        """
+
+    def sup(self) -> Optional[T]:
+        """上限を返す。
+
+        詳細は inf のドキュメントを参照。
+
+        Returns
+        -------
+        T
+            この UnionInterval の上限。この UnionInterval が空であるか上に有界でない場合は None。
+        """
+
+    def min(self) -> Optional[T]:
+        """最小値を返す。
+
+        min (max) は数学的な定義での最小値 (最大値) を返します。そのため ui がいかなる UnionInterval であっても、
+        以下のアサーションはエラーになりません。
+        >>> from unioninterval as interval
+        >>> ui: UnionInterval # = ...
+        >>> if ui.min() is not None:
+        >>>     assert ui.min() in ui
+        >>>     assert (ui * interval(None, ui.min(), edge='()')).is_empty
+        >>> if ui.max() is not None:
+        >>>     assert ui.max() in ui
+        >>>     assert (ui * interval(ui.max(), None, edge='()')).is_empty
+
+        このことは、たとえば 1 (3) が interval(1, 3, '()') の最小値 (最大値) にならないことを意味します
+        (実際、1 in interval(1, 3, '()') や 3 in interval(1, 3, '()' が満たされない)。
+        他のいかなる数も interval(1, 3, '()') の最小値 (最大値) であるための条件を満たさないので、最小値 (最大値) は存在しません。
+        このような場合、min (max) は None を返します。（上のアサーションの例で None チェックを行ってるのはそのためです。）
+
+        ただ境目が知りたいだけであれば ui.min() in ui (ui.max() in ui) は不要な性質かもしれません。
+        そのような場合は min (max) ではなく inf (sup) を使用します。
+
+        Returns
+        -------
+        T
+            この UnionInterval の最小値。下に閉じていない場合 (空である場合も含む) は None。
+        """
+
+    def max(self) -> Optional[T]:
+        """最大値を返す。
+
+        詳細は min のドキュメントを参照。
+
+        Returns
+        -------
+        T
+            この UnionInterval の最大値。上に閉じていない場合 (空である場合も含む) は None。
+        """
