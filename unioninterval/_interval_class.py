@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from functools import lru_cache
 from typing import TypeVar, Generic, List, Optional
 
 from ._interval_endpoint import MinEndPoint, MaxEndPoint
@@ -18,15 +19,10 @@ class Interval(Generic[T], ABC):
 
     def __eq__(self, other):
         if isinstance(other, Interval):
-            if self.is_empty and other.is_empty:
-                return True
-            else:
-                return self.start == other.start and \
-                       self.end == other.end and \
-                       self.include_start == other.include_start and \
-                       self.include_end == other.include_end
-        elif isinstance(other, UnionInterval):
-            return UnionInterval(self) == other
+            return self.start == other.start and \
+                   self.end == other.end and \
+                   self.include_start == other.include_start and \
+                   self.include_end == other.include_end
         else:
             return False
 
@@ -40,14 +36,6 @@ class Interval(Generic[T], ABC):
     def __repr__(self):
         return f'interval({self.start}, {self.end}, ' \
                f'\'{"[" if self.include_start else "("}{"]" if self.include_end else ")"}\')'
-
-    def __bool__(self):
-        return not self.is_empty
-
-    @property
-    @abstractmethod
-    def is_empty(self) -> bool:
-        ...
 
     @property
     @abstractmethod
@@ -73,10 +61,6 @@ class IntervalII(Interval[T]):
         return f'[{self.start}, {self.end}]'
 
     @property
-    def is_empty(self) -> bool:
-        return False
-
-    @property
     def is_singleton(self) -> bool:
         return self.start == self.end
 
@@ -94,10 +78,6 @@ class IntervalIE(Interval[T]):
 
     def __str__(self):
         return f'[{self.start}, {self.end})'
-
-    @property
-    def is_empty(self) -> bool:
-        return False
 
     @property
     def is_singleton(self) -> bool:
@@ -119,10 +99,6 @@ class IntervalEI(Interval[T]):
         return f'({self.start}, {self.end}]'
 
     @property
-    def is_empty(self) -> bool:
-        return False
-
-    @property
     def is_singleton(self) -> bool:
         return False
 
@@ -140,10 +116,6 @@ class IntervalEE(Interval[T]):
 
     def __str__(self):
         return f'({self.start}, {self.end})'
-
-    @property
-    def is_empty(self) -> bool:
-        return False
 
     @property
     def is_singleton(self) -> bool:
@@ -352,6 +324,18 @@ class UnionInterval(Generic[T]):
         else:
             return NotImplemented
 
+    def __sub__(self, other):
+        """集合論に置ける差集合演算
+
+        Parameters
+        ----------
+        UnionInterval[T]
+        """
+        if isinstance(other, UnionInterval):
+            return (self.complement() + other).complement()
+        else:
+            return NotImplemented
+
     def __mul__(self, other):
         """集合論における交叉演算
 
@@ -360,21 +344,7 @@ class UnionInterval(Generic[T]):
         UnionInterval[T]
         """
         if isinstance(other, UnionInterval):
-            # 分配法則 (a+b)*(c+d) = (a+b)*c + (a+b)*d を使用する。
-            unit_list_r = list(other._unit_list)
-
-            result = UnionInterval()
-            for set_range in map(lambda u: self * u, unit_list_r):
-                result += set_range
-
-            return result
-        elif isinstance(other, Interval):
-            # UnionInterval 同士の積の演算の中で UnionInterval * Interval がよばれるため、この分岐が必要。
-
-            # 分配法則 (a+b)*c = a*c + b*c を使用する。
-            # c をかけることで a, b の順序が逆転したり共通部分が生じたりすることはないため、改めて標準化する必要はない。
-            result_unit_list = filter(lambda u: u is not None, map(lambda u: _mul_units(u, other), self._unit_list))
-            return UnionInterval(*result_unit_list)
+            return self - other.complement()
         else:
             return NotImplemented
 
@@ -454,6 +424,7 @@ class UnionInterval(Generic[T]):
         else:
             return self._unit_list[-1].end != MaxEndPoint()
 
+    @lru_cache(maxsize=1)
     def complement(self):
         """補集合である UnionInterval を作成して返す。
 
@@ -482,6 +453,7 @@ class UnionInterval(Generic[T]):
         # 上のループで (-inf,-inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
         return UnionInterval(*filter(lambda u: u is not None, complement_unit_list))
 
+    @lru_cache(maxsize=4)
     def measure(self, *, zero=0):
         """UnionInterval の長さを返す。
 
