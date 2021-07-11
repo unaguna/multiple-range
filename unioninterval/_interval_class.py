@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from functools import lru_cache
 from typing import TypeVar, Generic, List, Optional
 
 from ._interval_endpoint import MinEndPoint, MaxEndPoint
@@ -452,6 +453,7 @@ class UnionInterval(Generic[T]):
         else:
             return self._unit_list[-1].end != MaxEndPoint()
 
+    @lru_cache(maxsize=1)
     def complement(self):
         """補集合である UnionInterval を作成して返す。
 
