@@ -788,3 +788,101 @@ class TestUnionIntervalClass:
             interval2: UnionInterval = sum(intervals[1:], interval(empty=True))
             assert isinstance(interval1[1:], UnionInterval)
             assert interval1[1:] == interval2
+
+    @pytest.mark.parametrize('interval1, is_interval', (
+        (interval(empty=True), True),
+        (interval(1, 5, edge='[]'), True),
+        (interval(1, 5, edge='[)'), True),
+        (interval(1, 5, edge='(]'), True),
+        (interval(1, 5, edge='()'), True),
+        (interval(1, None), True),
+        (interval(None, 1), True),
+        (interval(1, 3) + interval(3, 4), True),
+        (interval(1, 2) + interval(3, 4), False),
+        (interval(1, 2) + interval(3, 4) + interval(5, 6), False),
+    ))
+    def test__interval__is_interval(self, interval1: UnionInterval, is_interval: bool):
+        """UnionInterval#is_interval のテスト
+        """
+        assert interval1.is_interval == is_interval
+
+    @pytest.mark.parametrize('interval1, inf, sup, min_v, max_v', (
+        (interval(empty=True), None, None, None, None),
+        (interval(1, 5, edge='[]'), 1, 5, 1, 5),
+        (interval(1, 5, edge='[)'), 1, 5, 1, None),
+        (interval(1, 5, edge='(]'), 1, 5, None, 5),
+        (interval(1, 5, edge='()'), 1, 5, None, None),
+        (interval(1, None), 1, None, 1, None),
+        (interval(None, 1), None, 1, None, None),
+        (interval(None, None), None, None, None, None),
+        (interval(1, 3) + interval(3, 4), 1, 4, 1, None),
+        (interval(1, 2) + interval(3, 4), 1, 4, 1, None),
+        (interval(1, 2) + interval(3, 4) + interval(5, 6), 1, 6, 1, None),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='(]') + interval(5, 6, edge='()'), 1, 6, 1, None),
+    ))
+    def test__interval__min_max(self, interval1: UnionInterval, inf, sup, min_v, max_v):
+        """UnionInterval の最大値/最小値のテスト
+        """
+        assert interval1.inf() == inf
+        assert interval1.sup() == sup
+        assert interval1.min() == min_v
+        assert interval1.max() == max_v
+
+    @pytest.mark.parametrize('interval1, left_open, right_open', (
+        (interval(empty=True), True, True),
+        (interval(1, 5, edge='[]'), False, False),
+        (interval(1, 5, edge='[)'), False, True),
+        (interval(1, 5, edge='(]'), True, False),
+        (interval(1, 5, edge='()'), True, True),
+        (interval(1, None), False, True),
+        (interval(None, 1), True, True),
+        (interval(None, None), True, True),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='[]'), False, False),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='[]'), False, False),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='[]'), True, False),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='[]'), True, False),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='[)'), False, True),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='[)'), False, True),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='[)'), True, True),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='[)'), True, True),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='(]'), False, False),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='(]'), False, False),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='(]'), True, False),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='(]'), True, False),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='()'), False, True),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='()'), False, True),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='()'), True, True),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='()'), True, True),
+    ))
+    def test__interval__open__closed(self, interval1: UnionInterval, left_open, right_open):
+        """UnionInterval の left_open, right_open のテスト
+        """
+        if left_open:
+            assert interval1.left_open()
+            assert not interval1.left_closed()
+        else:
+            assert not interval1.left_open()
+            assert interval1.left_closed()
+
+        if right_open:
+            assert interval1.right_open()
+            assert not interval1.right_closed()
+        else:
+            assert not interval1.right_open()
+            assert interval1.right_closed()
+
+    @pytest.mark.parametrize('interval1, is_singleton', (
+        (interval(empty=True), False),
+        (interval(singleton=1), True),
+        (interval(1, 1, edge='[]'), True),
+        (interval(1, 2, edge='[]'), False),
+        (interval(1, 2, edge='[)'), False),
+        (interval(1, 2, edge='(]'), False),
+        (interval(1, 2, edge='()'), False),
+        (interval(singleton=1) + interval(singleton=1), True),
+        (interval(singleton=1) + interval(singleton=2), False),
+    ))
+    def test__interval__is_singleton(self, interval1: UnionInterval, is_singleton):
+        """単集合判定をテストする。
+        """
+        assert interval1.is_singleton == is_singleton

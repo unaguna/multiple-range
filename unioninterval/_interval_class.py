@@ -49,6 +49,11 @@ class Interval(Generic[T], ABC):
     def is_empty(self) -> bool:
         ...
 
+    @property
+    @abstractmethod
+    def is_singleton(self) -> bool:
+        ...
+
     def measure(self):
         return self.end - self.start
 
@@ -71,6 +76,10 @@ class IntervalII(Interval[T]):
     def is_empty(self) -> bool:
         return False
 
+    @property
+    def is_singleton(self) -> bool:
+        return self.start == self.end
+
 
 class IntervalIE(Interval[T]):
 
@@ -88,6 +97,10 @@ class IntervalIE(Interval[T]):
 
     @property
     def is_empty(self) -> bool:
+        return False
+
+    @property
+    def is_singleton(self) -> bool:
         return False
 
 
@@ -109,6 +122,10 @@ class IntervalEI(Interval[T]):
     def is_empty(self) -> bool:
         return False
 
+    @property
+    def is_singleton(self) -> bool:
+        return False
+
 
 class IntervalEE(Interval[T]):
 
@@ -126,6 +143,10 @@ class IntervalEE(Interval[T]):
 
     @property
     def is_empty(self) -> bool:
+        return False
+
+    @property
+    def is_singleton(self) -> bool:
         return False
 
 
@@ -492,3 +513,186 @@ class UnionInterval(Generic[T]):
     @property
     def is_empty(self) -> bool:
         return len(self._unit_list) <= 0
+
+    @property
+    def is_interval(self) -> bool:
+        """数学的な区間であるかどうかを返す。
+
+        Returns
+        -------
+        bool
+            この UnionInterval が含むいかなる2点についてもその中点がこの UnionInterval に含まれるなら True。
+            そうでなければ False。
+        """
+        return len(self._unit_list) <= 1
+
+    @property
+    def is_singleton(self) -> bool:
+        if len(self._unit_list) != 1:
+            return False
+        else:
+            return self._unit_list[0].is_singleton
+
+    def inf(self) -> Optional[T]:
+        """下限を返す。
+
+        inf (sup) は min (max) と似ています。実際、ui がいかなる UnionInterval であっても、
+        inf (sup) と min (max) は次のように共通の性質を持ち、とくに min (max) が存在するとき inf (sup) も存在して
+        min == inf (max == sup) を満たします。
+        >>> from unioninterval as interval
+        >>> ui: UnionInterval # = ...
+        >>> if ui.min() is not None:
+        >>>     assert (ui * interval(None, ui.min(), edge='()')).is_empty
+        >>>     assert ui.min() == ui.inf()
+        >>> if ui.inf() is not None:
+        >>>     assert (ui * interval(None, ui.inf(), edge='()')).is_empty
+        >>> if ui.max() is not None:
+        >>>     assert (ui * interval(ui.max(), None, edge='()')).is_empty
+        >>>     assert ui.max() == ui.sup()
+        >>> if ui.sup() is not None:
+        >>>     assert (ui * interval(ui.sup(), None, edge='()')).is_empty
+
+        inf (sup) と min (max) の違いは、min のみ下記の性質も併せ持つという点です。
+        >>> from unioninterval as interval
+        >>> ui: UnionInterval # = ...
+        >>> if ui.min() is not None:
+        >>>     assert ui.min() in ui
+        >>> if ui.max() is not None:
+        >>>     assert ui.max() in ui
+        ただ境目が知りたいだけであればこの性質は不要かもしれません。そのような場合は inf (sup) を使用します。
+
+        Returns
+        -------
+        T
+            この UnionInterval の下限。この UnionInterval が空であるか下に有界でない場合は None。
+        """
+        if self.is_empty:
+            return None
+        else:
+            inf = self._unit_list[0].start
+            if inf != MinEndPoint():
+                return inf
+            else:
+                return None
+
+    def sup(self) -> Optional[T]:
+        """上限を返す。
+
+        詳細は inf のドキュメントを参照。
+
+        Returns
+        -------
+        T
+            この UnionInterval の上限。この UnionInterval が空であるか上に有界でない場合は None。
+        """
+        if self.is_empty:
+            return None
+        else:
+            sup = self._unit_list[-1].end
+            if sup != MaxEndPoint():
+                return sup
+            else:
+                return None
+
+    def min(self) -> Optional[T]:
+        """最小値を返す。
+
+        min (max) は数学的な定義での最小値 (最大値) を返します。そのため ui がいかなる UnionInterval であっても、
+        以下のアサーションはエラーになりません。
+        >>> from unioninterval as interval
+        >>> ui: UnionInterval # = ...
+        >>> if ui.min() is not None:
+        >>>     assert ui.min() in ui
+        >>>     assert (ui * interval(None, ui.min(), edge='()')).is_empty
+        >>> if ui.max() is not None:
+        >>>     assert ui.max() in ui
+        >>>     assert (ui * interval(ui.max(), None, edge='()')).is_empty
+
+        このことは、たとえば 1 (3) が interval(1, 3, '()') の最小値 (最大値) にならないことを意味します
+        (実際、1 in interval(1, 3, '()') や 3 in interval(1, 3, '()' が満たされない)。
+        他のいかなる数も interval(1, 3, '()') の最小値 (最大値) であるための条件を満たさないので、最小値 (最大値) は存在しません。
+        このような場合、min (max) は None を返します。（上のアサーションの例で None チェックを行ってるのはそのためです。）
+
+        ただ境目が知りたいだけであれば ui.min() in ui (ui.max() in ui) は不要な性質かもしれません。
+        そのような場合は min (max) ではなく inf (sup) を使用します。
+
+        Returns
+        -------
+        T
+            この UnionInterval の最小値。下に閉じていない場合 (空である場合も含む) は None。
+        """
+        if self.left_closed():
+            return self.inf()
+        else:
+            return None
+
+    def max(self) -> Optional[T]:
+        """最大値を返す。
+
+        詳細は min のドキュメントを参照。
+
+        Returns
+        -------
+        T
+            この UnionInterval の最大値。上に閉じていない場合 (空である場合も含む) は None。
+        """
+        if self.right_closed():
+            return self.sup()
+        else:
+            return None
+
+    def left_open(self) -> bool:
+        """このインスタンスが左に開いているかどうかを返す。
+
+        左に開いているとは、最小値が存在しないことを意味します。最小値については min や inf のドキュメントを参照してください。
+
+        このメソッドと left_closed は対になり、常に逆の値を返します。
+
+        Returns
+        -------
+        bool
+            このインスタンスが左に開いているなら True、そうでないなら False。
+        """
+        return not self.left_closed()
+
+    def left_closed(self) -> bool:
+        """このインスタンスが左に閉じているかどうかを返す。
+
+        左に閉じているとは、最小値が存在することを意味します。最小値については min や inf のドキュメントを参照してください。
+
+        このメソッドと left_open は対になり、常に逆の値を返します。
+
+        Returns
+        -------
+        bool
+            このインスタンスが左に閉じているなら True、そうでないなら False。
+        """
+        return not self.is_empty and self._unit_list[0].include_start
+
+    def right_open(self) -> bool:
+        """このインスタンスが右に開いているかどうかを返す。
+
+        右に開いているとは、最大値が存在しないことを意味します。最大値については max や sup のドキュメントを参照してください。
+
+        このメソッドと right_closed は対になり、常に逆の値を返します。
+
+        Returns
+        -------
+        bool
+            このインスタンスが右に開いているなら True、そうでないなら False。
+        """
+        return not self.right_closed()
+
+    def right_closed(self) -> bool:
+        """このインスタンスが右に閉じているかどうかを返す。
+
+        右に閉じているとは、最大値が存在することを意味します。最大値については max や sup のドキュメントを参照してください。
+
+        このメソッドと right_open は対になり、常に逆の値を返します。
+
+        Returns
+        -------
+        bool
+            このインスタンスが右に閉じているなら True、そうでないなら False。
+        """
+        return not self.is_empty and self._unit_list[-1].include_end
