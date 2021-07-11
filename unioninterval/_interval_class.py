@@ -360,7 +360,7 @@ class UnionInterval(Generic[T]):
         UnionInterval[T]
         """
         if isinstance(other, UnionInterval):
-            return self * other.complement()
+            return (self.complement() + other).complement()
         else:
             return NotImplemented
 
