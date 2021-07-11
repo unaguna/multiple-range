@@ -533,12 +533,19 @@ class UnionInterval(Generic[T]):
         >>>     assert ui.max() in ui
         ただ境目が知りたいだけであればこの性質は不要かもしれません。そのような場合は inf (sup) を使用します。
 
-
         Returns
         -------
         T
             この UnionInterval の下限。この UnionInterval が空であるか下に有界でない場合は None。
         """
+        if self.is_empty:
+            return None
+        else:
+            inf = self._unit_list[0].start
+            if inf != MinEndPoint():
+                return inf
+            else:
+                return None
 
     def sup(self) -> Optional[T]:
         """上限を返す。
@@ -550,6 +557,14 @@ class UnionInterval(Generic[T]):
         T
             この UnionInterval の上限。この UnionInterval が空であるか上に有界でない場合は None。
         """
+        if self.is_empty:
+            return None
+        else:
+            sup = self._unit_list[-1].end
+            if sup != MaxEndPoint():
+                return sup
+            else:
+                return None
 
     def min(self) -> Optional[T]:
         """最小値を返す。
@@ -578,6 +593,13 @@ class UnionInterval(Generic[T]):
         T
             この UnionInterval の最小値。下に閉じていない場合 (空である場合も含む) は None。
         """
+        if self.is_empty:
+            return None
+        else:
+            if self._unit_list[0].include_start:
+                return self.inf()
+            else:
+                return None
 
     def max(self) -> Optional[T]:
         """最大値を返す。
@@ -589,3 +611,10 @@ class UnionInterval(Generic[T]):
         T
             この UnionInterval の最大値。上に閉じていない場合 (空である場合も含む) は None。
         """
+        if self.is_empty:
+            return None
+        else:
+            if self._unit_list[-1].include_end:
+                return self.sup()
+            else:
+                return None

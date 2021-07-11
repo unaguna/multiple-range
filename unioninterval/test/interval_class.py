@@ -818,6 +818,7 @@ class TestUnionIntervalClass:
         (interval(1, 3) + interval(3, 4), 1, 4, 1, None),
         (interval(1, 2) + interval(3, 4), 1, 4, 1, None),
         (interval(1, 2) + interval(3, 4) + interval(5, 6), 1, 6, 1, None),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='(]') + interval(5, 6, edge='()'), 1, 6, 1, None),
     ))
     def test__interval__min_max(self, interval1: UnionInterval, inf, sup, min_v, max_v):
         """UnionInterval の最大値/最小値のテスト
