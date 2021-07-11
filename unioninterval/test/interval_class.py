@@ -537,7 +537,7 @@ class TestUnionIntervalClass:
         (interval(1, 10, edge='[]'), interval(None, None), interval(empty=True)),
         # 他
         (interval(1, 2) + interval(3, 4), interval(1.5, 1.7) + interval(1.9, 3.5),
-         interval(1.0, 1.5) + interval(1.7, 2.0) + interval(3.5, 4.0)),
+         interval(1.0, 1.5) + interval(1.7, 1.9) + interval(3.5, 4.0)),
 
     ))
     def test__interval_unit_int__sub__unit(self, interval1, interval2, interval_r):

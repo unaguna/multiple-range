@@ -352,6 +352,18 @@ class UnionInterval(Generic[T]):
         else:
             return NotImplemented
 
+    def __sub__(self, other):
+        """集合論に置ける差集合演算
+
+        Parameters
+        ----------
+        UnionInterval[T]
+        """
+        if isinstance(other, UnionInterval):
+            return self * other.complement()
+        else:
+            return NotImplemented
+
     def __mul__(self, other):
         """集合論における交叉演算
 
