@@ -593,13 +593,10 @@ class UnionInterval(Generic[T]):
         T
             この UnionInterval の最小値。下に閉じていない場合 (空である場合も含む) は None。
         """
-        if self.is_empty:
-            return None
+        if self.left_closed():
+            return self.inf()
         else:
-            if self._unit_list[0].include_start:
-                return self.inf()
-            else:
-                return None
+            return None
 
     def max(self) -> Optional[T]:
         """最大値を返す。
@@ -611,13 +608,10 @@ class UnionInterval(Generic[T]):
         T
             この UnionInterval の最大値。上に閉じていない場合 (空である場合も含む) は None。
         """
-        if self.is_empty:
-            return None
+        if self.right_closed():
+            return self.sup()
         else:
-            if self._unit_list[-1].include_end:
-                return self.sup()
-            else:
-                return None
+            return None
 
     def left_open(self) -> bool:
         """このインスタンスが左に開いているかどうかを返す。
