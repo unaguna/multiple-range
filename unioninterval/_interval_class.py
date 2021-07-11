@@ -19,13 +19,10 @@ class Interval(Generic[T], ABC):
 
     def __eq__(self, other):
         if isinstance(other, Interval):
-            if self.is_empty and other.is_empty:
-                return True
-            else:
-                return self.start == other.start and \
-                       self.end == other.end and \
-                       self.include_start == other.include_start and \
-                       self.include_end == other.include_end
+            return self.start == other.start and \
+                   self.end == other.end and \
+                   self.include_start == other.include_start and \
+                   self.include_end == other.include_end
         elif isinstance(other, UnionInterval):
             return UnionInterval(self) == other
         else:
@@ -41,14 +38,6 @@ class Interval(Generic[T], ABC):
     def __repr__(self):
         return f'interval({self.start}, {self.end}, ' \
                f'\'{"[" if self.include_start else "("}{"]" if self.include_end else ")"}\')'
-
-    def __bool__(self):
-        return not self.is_empty
-
-    @property
-    @abstractmethod
-    def is_empty(self) -> bool:
-        ...
 
     @property
     @abstractmethod
@@ -74,10 +63,6 @@ class IntervalII(Interval[T]):
         return f'[{self.start}, {self.end}]'
 
     @property
-    def is_empty(self) -> bool:
-        return False
-
-    @property
     def is_singleton(self) -> bool:
         return self.start == self.end
 
@@ -95,10 +80,6 @@ class IntervalIE(Interval[T]):
 
     def __str__(self):
         return f'[{self.start}, {self.end})'
-
-    @property
-    def is_empty(self) -> bool:
-        return False
 
     @property
     def is_singleton(self) -> bool:
@@ -120,10 +101,6 @@ class IntervalEI(Interval[T]):
         return f'({self.start}, {self.end}]'
 
     @property
-    def is_empty(self) -> bool:
-        return False
-
-    @property
     def is_singleton(self) -> bool:
         return False
 
@@ -141,10 +118,6 @@ class IntervalEE(Interval[T]):
 
     def __str__(self):
         return f'({self.start}, {self.end})'
-
-    @property
-    def is_empty(self) -> bool:
-        return False
 
     @property
     def is_singleton(self) -> bool:
