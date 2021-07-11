@@ -482,6 +482,7 @@ class UnionInterval(Generic[T]):
         # 上のループで (-inf,-inf] を作ろうとした場合などに complement_unit_list に None が入るため、それを除去して使用する。
         return UnionInterval(*filter(lambda u: u is not None, complement_unit_list))
 
+    @lru_cache(maxsize=4)
     def measure(self, *, zero=0):
         """UnionInterval の長さを返す。
 
