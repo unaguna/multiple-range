@@ -504,6 +504,47 @@ class TestUnionIntervalClass:
             result = interval1 + interval2
             assert result == interval_m
 
+    @pytest.mark.parametrize('interval1, interval2, interval_r', (
+        # interval1 を2つに分割するパターン
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='[]'), interval(1, 5, edge='[)') + interval(6, 10, edge='()')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='[)'), interval(1, 5, edge='[)') + interval(6, 10, edge='[)')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='(]'), interval(1, 5, edge='[]') + interval(6, 10, edge='()')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='()'), interval(1, 5, edge='[]') + interval(6, 10, edge='[)')),
+        (interval(1, 10, edge='[)'), interval(singleton=5), interval(1, 5, edge='[)') + interval(5, 10, edge='()')),
+        # interval1 の左側が削られるパターン
+        (interval(1, 10, edge='[)'), interval(0, 6, edge='[]'), interval(6, 10, edge='()')),
+        (interval(1, 10, edge='[)'), interval(0, 6, edge='[)'), interval(6, 10, edge='[)')),
+        # interval1 の右側が削られるパターン
+        (interval(1, 10, edge='[)'), interval(5, 20, edge='[]'), interval(1, 5, edge='[)')),
+        (interval(1, 10, edge='[)'), interval(5, 20, edge='(]'), interval(1, 5, edge='[]')),
+        # 2つのオペランドの両端が一致するパターン
+        (interval(1, 10, edge='[]'), interval(1, 10, edge='[]'), interval(empty=True)),
+        (interval(1, 10, edge='[]'), interval(1, 10, edge='[)'), interval(singleton=10)),
+        (interval(1, 10, edge='[]'), interval(1, 10, edge='(]'), interval(singleton=1)),
+        (interval(1, 10, edge='[]'), interval(1, 10, edge='()'), interval(singleton=1) + interval(singleton=10)),
+        # オペランドの一方が空であるパターン
+        (interval(1, 10, edge='[]'), interval(empty=True), interval(1, 10, edge='[]')),
+        (interval(1, 10, edge='[)'), interval(empty=True), interval(1, 10, edge='[)')),
+        (interval(1, 10, edge='(]'), interval(empty=True), interval(1, 10, edge='(]')),
+        (interval(1, 10, edge='()'), interval(empty=True), interval(1, 10, edge='()')),
+        (interval(empty=True), interval(1, 10, edge='[]'), interval(empty=True)),
+        (interval(empty=True), interval(1, 10, edge='[)'), interval(empty=True)),
+        (interval(empty=True), interval(1, 10, edge='(]'), interval(empty=True)),
+        (interval(empty=True), interval(1, 10, edge='()'), interval(empty=True)),
+        # 右オペランドが有界でない場合
+        (interval(1, 10, edge='[]'), interval(5, None, edge='[)'), interval(1, 5, edge='[)')),
+        (interval(1, 10, edge='[]'), interval(None, 5, edge='(]'), interval(5, 10, edge='(]')),
+        (interval(1, 10, edge='[]'), interval(None, None), interval(empty=True)),
+        # 他
+        (interval(1, 2) + interval(3, 4), interval(1.5, 1.7) + interval(1.9, 3.5),
+         interval(1.0, 1.5) + interval(1.7, 2.0) + interval(3.5, 4.0)),
+
+    ))
+    def test__interval_unit_int__sub__unit(self, interval1, interval2, interval_r):
+        """レンジ[int]()の減法演算 (差集合) をテストする。
+        """
+        assert interval1 - interval2 == interval_r
+
     @pytest.mark.parametrize('interval1, interval2, interval_m', (
         # 一方が他方を包含するパターン
         (interval(5, 10, '[]'), interval(7, 9, '[]'), interval(7, 9, '[]')),
