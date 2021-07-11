@@ -631,6 +631,7 @@ class UnionInterval(Generic[T]):
         bool
             このインスタンスが左に開いているなら True、そうでないなら False。
         """
+        return not self.left_closed()
 
     def left_closed(self) -> bool:
         """このインスタンスが左に閉じているかどうかを返す。
@@ -644,6 +645,7 @@ class UnionInterval(Generic[T]):
         bool
             このインスタンスが左に閉じているなら True、そうでないなら False。
         """
+        return not self.is_empty and self._unit_list[0].include_start
 
     def right_open(self) -> bool:
         """このインスタンスが右に開いているかどうかを返す。
@@ -657,6 +659,7 @@ class UnionInterval(Generic[T]):
         bool
             このインスタンスが右に開いているなら True、そうでないなら False。
         """
+        return not self.right_closed()
 
     def right_closed(self) -> bool:
         """このインスタンスが右に閉じているかどうかを返す。
@@ -670,3 +673,4 @@ class UnionInterval(Generic[T]):
         bool
             このインスタンスが右に閉じているなら True、そうでないなら False。
         """
+        return not self.is_empty and self._unit_list[-1].include_end
