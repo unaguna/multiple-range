@@ -23,8 +23,6 @@ class Interval(Generic[T], ABC):
                    self.end == other.end and \
                    self.include_start == other.include_start and \
                    self.include_end == other.include_end
-        elif isinstance(other, UnionInterval):
-            return UnionInterval(self) == other
         else:
             return False
 

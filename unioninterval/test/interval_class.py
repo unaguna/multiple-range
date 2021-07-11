@@ -492,11 +492,11 @@ class TestUnionIntervalClass:
         if isinstance(interval_m, list):
             result = interval2 + interval1
             assert not result.is_empty
-            assert result._unit_list == interval_m
+            assert result._unit_list == list(map(lambda ui: ui._unit_list[0], interval_m))
 
             result = interval1 + interval2
             assert not result.is_empty
-            assert result._unit_list == interval_m
+            assert result._unit_list == list(map(lambda ui: ui._unit_list[0], interval_m))
         else:
             result = interval2 + interval1
             assert result == interval_m
