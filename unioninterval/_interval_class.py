@@ -372,21 +372,7 @@ class UnionInterval(Generic[T]):
         UnionInterval[T]
         """
         if isinstance(other, UnionInterval):
-            # 分配法則 (a+b)*(c+d) = (a+b)*c + (a+b)*d を使用する。
-            unit_list_r = list(other._unit_list)
-
-            result = UnionInterval()
-            for set_range in map(lambda u: self * u, unit_list_r):
-                result += set_range
-
-            return result
-        elif isinstance(other, Interval):
-            # UnionInterval 同士の積の演算の中で UnionInterval * Interval がよばれるため、この分岐が必要。
-
-            # 分配法則 (a+b)*c = a*c + b*c を使用する。
-            # c をかけることで a, b の順序が逆転したり共通部分が生じたりすることはないため、改めて標準化する必要はない。
-            result_unit_list = filter(lambda u: u is not None, map(lambda u: _mul_units(u, other), self._unit_list))
-            return UnionInterval(*result_unit_list)
+            return self - other.complement()
         else:
             return NotImplemented
 
