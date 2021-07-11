@@ -870,3 +870,19 @@ class TestUnionIntervalClass:
         else:
             assert not interval1.right_open()
             assert interval1.right_closed()
+
+    @pytest.mark.parametrize('interval1, is_singleton', (
+        (interval(empty=True), False),
+        (interval(singleton=1), True),
+        (interval(1, 1, edge='[]'), True),
+        (interval(1, 2, edge='[]'), False),
+        (interval(1, 2, edge='[)'), False),
+        (interval(1, 2, edge='(]'), False),
+        (interval(1, 2, edge='()'), False),
+        (interval(singleton=1) + interval(singleton=1), True),
+        (interval(singleton=1) + interval(singleton=2), False),
+    ))
+    def test__interval__is_singleton(self, interval1: UnionInterval, is_singleton):
+        """単集合判定をテストする。
+        """
+        assert interval1.is_singleton == is_singleton

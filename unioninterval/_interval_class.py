@@ -49,6 +49,11 @@ class Interval(Generic[T], ABC):
     def is_empty(self) -> bool:
         ...
 
+    @property
+    @abstractmethod
+    def is_singleton(self) -> bool:
+        ...
+
     def measure(self):
         return self.end - self.start
 
@@ -71,6 +76,10 @@ class IntervalII(Interval[T]):
     def is_empty(self) -> bool:
         return False
 
+    @property
+    def is_singleton(self) -> bool:
+        return self.start == self.end
+
 
 class IntervalIE(Interval[T]):
 
@@ -88,6 +97,10 @@ class IntervalIE(Interval[T]):
 
     @property
     def is_empty(self) -> bool:
+        return False
+
+    @property
+    def is_singleton(self) -> bool:
         return False
 
 
@@ -109,6 +122,10 @@ class IntervalEI(Interval[T]):
     def is_empty(self) -> bool:
         return False
 
+    @property
+    def is_singleton(self) -> bool:
+        return False
+
 
 class IntervalEE(Interval[T]):
 
@@ -126,6 +143,10 @@ class IntervalEE(Interval[T]):
 
     @property
     def is_empty(self) -> bool:
+        return False
+
+    @property
+    def is_singleton(self) -> bool:
         return False
 
 
@@ -504,6 +525,13 @@ class UnionInterval(Generic[T]):
             そうでなければ False。
         """
         return len(self._unit_list) <= 1
+
+    @property
+    def is_singleton(self) -> bool:
+        if len(self._unit_list) != 1:
+            return False
+        else:
+            return self._unit_list[0].is_singleton
 
     def inf(self) -> Optional[T]:
         """下限を返す。
