@@ -827,3 +827,46 @@ class TestUnionIntervalClass:
         assert interval1.sup() == sup
         assert interval1.min() == min_v
         assert interval1.max() == max_v
+
+    @pytest.mark.parametrize('interval1, left_open, right_open', (
+        (interval(empty=True), True, True),
+        (interval(1, 5, edge='[]'), False, False),
+        (interval(1, 5, edge='[)'), False, True),
+        (interval(1, 5, edge='(]'), True, False),
+        (interval(1, 5, edge='()'), True, True),
+        (interval(1, None), False, True),
+        (interval(None, 1), True, True),
+        (interval(None, None), True, True),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='[]'), False, False),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='[]'), False, False),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='[]'), True, False),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='[]'), True, False),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='[)'), False, True),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='[)'), False, True),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='[)'), True, True),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='[)'), True, True),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='(]'), False, False),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='(]'), False, False),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='(]'), True, False),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='(]'), True, False),
+        (interval(1, 2, edge='[]') + interval(3, 4, edge='()'), False, True),
+        (interval(1, 2, edge='[)') + interval(3, 4, edge='()'), False, True),
+        (interval(1, 2, edge='(]') + interval(3, 4, edge='()'), True, True),
+        (interval(1, 2, edge='()') + interval(3, 4, edge='()'), True, True),
+    ))
+    def test__interval__open__closed(self, interval1: UnionInterval, left_open, right_open):
+        """UnionInterval の left_open, right_open のテスト
+        """
+        if left_open:
+            assert interval1.left_open()
+            assert not interval1.left_closed()
+        else:
+            assert not interval1.left_open()
+            assert interval1.left_closed()
+
+        if right_open:
+            assert interval1.right_open()
+            assert not interval1.right_closed()
+        else:
+            assert not interval1.right_open()
+            assert interval1.right_closed()
