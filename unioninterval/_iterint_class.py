@@ -50,4 +50,8 @@ class UnionRange:
             return False
 
     def __iter__(self):
-        pass
+        for interval_unit in self._base_union_interval:
+            num = interval_unit.min()
+            while num in interval_unit:
+                yield num
+                num = num + 1
