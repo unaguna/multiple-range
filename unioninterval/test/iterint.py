@@ -38,6 +38,7 @@ class TestIterint:
             assert iterint(interval1) != iterint(interval2)
 
     @pytest.mark.parametrize('interval1, int_list', (
+        (interval(empty=True), []),
         (interval(1, 5, edge='[]'), [1, 2, 3, 4, 5]),
         (interval(1, 5, edge='[)'), [1, 2, 3, 4]),
         (interval(1, 5, edge='(]'), [2, 3, 4, 5]),
