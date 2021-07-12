@@ -3,4 +3,4 @@ from ._iterint_class import UnionRange
 
 
 def iterint(union_interval: UnionInterval) -> UnionRange:
-    ...
+    return UnionRange(union_interval)
