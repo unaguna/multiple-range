@@ -22,6 +22,9 @@ def _normalize_int_interval(union_interval: UnionInterval) -> UnionInterval[int]
     if not union_interval.is_interval:
         return sum(map(_normalize_int_interval, union_interval), interval(empty=True))
     else:
+        if union_interval.is_empty:
+            return union_interval
+
         # start を決定
         if union_interval.left_closed():
             start = math.ceil(union_interval.inf())
