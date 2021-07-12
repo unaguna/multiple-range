@@ -33,3 +33,22 @@ class TestIterint:
         else:
             assert not iterint(interval1) == iterint(interval2)
             assert iterint(interval1) != iterint(interval2)
+
+    @pytest.mark.parametrize('interval1, int_list', (
+        (interval(1, 5, edge='[]'), [1, 2, 3, 4, 5]),
+        (interval(1, 5, edge='[)'), [1, 2, 3, 4]),
+        (interval(1, 5, edge='(]'), [2, 3, 4, 5]),
+        (interval(1, 5, edge='()'), [2, 3, 4]),
+        (interval(0.9, 5.1, edge='[]'), [1, 2, 3, 4, 5]),
+        (interval(0.9, 5.1, edge='[)'), [1, 2, 3, 4, 5]),
+        (interval(0.9, 5.1, edge='(]'), [1, 2, 3, 4, 5]),
+        (interval(0.9, 5.1, edge='()'), [1, 2, 3, 4, 5]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='[]'), [1, 2, 3, 5, 6, 7]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='[)'), [1, 2, 3, 5, 6]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [1, 2, 3, 6, 7]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [1, 2, 3, 6]),
+    ))
+    def test__iterint__iter(self, interval1: UnionInterval, int_list):
+        """iterint のイテレータをテストする。
+        """
+        assert list(iterint(interval1)) == int_list

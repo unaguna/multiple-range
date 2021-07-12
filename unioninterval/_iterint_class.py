@@ -48,3 +48,6 @@ class UnionRange:
             return self._base_union_interval == other._base_union_interval
         else:
             return False
+
+    def __iter__(self):
+        pass
