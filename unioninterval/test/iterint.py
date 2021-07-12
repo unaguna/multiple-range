@@ -23,6 +23,9 @@ class TestIterint:
         (interval(1, 3, edge='[)') + interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), False),
         (interval(1, 3, edge='[)') + interval(4, 6, edge='[]'),
          interval(1, 3, edge='[)') + interval(4, 7, edge='[)'), True),
+        (interval(1, 2, edge='[)'), interval(singleton=1), True),
+        (interval(1, 2, edge='(]'), interval(singleton=2), True),
+        (interval(1, 2, edge='()'), interval(empty=True), True),
     ))
     def test__iterint__equal(self, interval1: UnionInterval, interval2: UnionInterval, expected_equal):
         """iterint の等号演算をテストする。
