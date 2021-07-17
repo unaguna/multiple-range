@@ -97,7 +97,11 @@ class _UnionRangeReversed(UnionRange):
                 num = num - 1
 
     def __reversed__(self):
-        raise NotImplementedError()
+        for interval_unit in self._base_union_interval:
+            num = interval_unit.inf() + 1
+            while num in interval_unit:
+                yield num
+                num = num + 1
 
     def _normalize_int_interval(self, union_interval: UnionInterval) -> UnionInterval[int]:
         if not union_interval.is_interval:

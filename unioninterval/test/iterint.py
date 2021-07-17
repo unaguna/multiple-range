@@ -128,7 +128,27 @@ class TestIterint:
         (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [7, 6, 3, 2, 1]),
         (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [6, 3, 2, 1]),
     ))
-    def test__iterint__iter__reverse(self, interval1: UnionInterval, int_list):
+    def test__iterint__reverse__iter(self, interval1: UnionInterval, int_list):
         """逆順 iterint のイテレータをテストする。
         """
         assert list(iterint(interval1, reverse=True)) == int_list
+
+    @pytest.mark.parametrize('interval1, int_list', (
+        (interval(empty=True), []),
+        (interval(1, 5, edge='[]'), [1, 2, 3, 4, 5]),
+        (interval(1, 5, edge='[)'), [1, 2, 3, 4]),
+        (interval(1, 5, edge='(]'), [2, 3, 4, 5]),
+        (interval(1, 5, edge='()'), [2, 3, 4]),
+        (interval(0.9, 5.1, edge='[]'), [1, 2, 3, 4, 5]),
+        (interval(0.9, 5.1, edge='[)'), [1, 2, 3, 4, 5]),
+        (interval(0.9, 5.1, edge='(]'), [1, 2, 3, 4, 5]),
+        (interval(0.9, 5.1, edge='()'), [1, 2, 3, 4, 5]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='[]'), [1, 2, 3, 5, 6, 7]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='[)'), [1, 2, 3, 5, 6]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [1, 2, 3, 6, 7]),
+        (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [1, 2, 3, 6]),
+    ))
+    def test__iterint__reverse__iter__reversed(self, interval1: UnionInterval, int_list):
+        """逆順 iterint の逆順イテレータをテストする。
+        """
+        assert list(reversed(iterint(interval1, reverse=True))) == int_list
