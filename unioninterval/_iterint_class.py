@@ -45,6 +45,9 @@ class UnionRange(abc.ABC):
 
 class _UnionRangeForward(UnionRange):
 
+    def __repr__(self):
+        return f'iterint({repr(self._base_union_interval)})'
+
     def __iter__(self):
         for interval_unit in self._base_union_interval:
             num = interval_unit.min()
