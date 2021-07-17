@@ -24,6 +24,10 @@ class UnionRange(abc.ABC):
         ...
 
     @abstractmethod
+    def __reversed__(self):
+        ...
+
+    @abstractmethod
     def _normalize_int_interval(self, union_interval: UnionInterval) -> UnionInterval[int]:
         """区間を正規化する。
 
@@ -47,6 +51,13 @@ class _UnionRangeForward(UnionRange):
             while num in interval_unit:
                 yield num
                 num = num + 1
+
+    def __reversed__(self):
+        for interval_unit in reversed(self._base_union_interval):
+            num = interval_unit.sup() - 1
+            while num in interval_unit:
+                yield num
+                num = num - 1
 
     def _normalize_int_interval(self, union_interval: UnionInterval) -> UnionInterval[int]:
         if not union_interval.is_interval:
