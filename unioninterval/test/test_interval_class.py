@@ -17,7 +17,7 @@ class TestUnionIntervalClass:
             interval('f', 's'),
             interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
     ))
-    def test__interval_unit__type(self, set_range):
+    def test__interval__type(self, set_range):
         """interval関数の戻り値の型をテストする
         """
         assert isinstance(set_range, UnionInterval)
@@ -41,7 +41,7 @@ class TestUnionIntervalClass:
         (interval(None, None, edge='(]'), '(-inf, inf)'),
         (interval(None, None, edge='()'), '(-inf, inf)'),
     ))
-    def test__interval_unit_int__str(self, set_range, expected_str):
+    def test__interval_int__str(self, set_range, expected_str):
         """単レンジ[int]の文字列化をテストする。
         """
         assert str(set_range) == expected_str
@@ -80,7 +80,7 @@ class TestUnionIntervalClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 33)),
          interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 34)), False),
     ))
-    def test__interval_unit__equal(self, set_range_1, set_range_2, expected_equal):
+    def test__interval__equal(self, set_range_1, set_range_2, expected_equal):
         """単レンジの等号演算をテストする。
         """
         if expected_equal:
@@ -172,7 +172,7 @@ class TestUnionIntervalClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), None),
          datetime(2100, 12, 30, 11, 22, 33), True),
     ))
-    def test__interval_unit__contain(self, set_range, element, expected_contain):
+    def test__interval__contain(self, set_range, element, expected_contain):
         """単レンジの含有演算をテストする。
 
         端点と比較できるオブジェクトであれば、含有するかどうか確かめられる。
@@ -220,7 +220,7 @@ class TestUnionIntervalClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '(]'), True),
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '()'), True),
     ))
-    def test__interval_unit_empty__start_g_end(self, target, is_empty):
+    def test__interval_empty__start_g_end(self, target, is_empty):
         """端点の指定次第で単レンジが空になることをテストする。
         """
         assert target.is_empty == is_empty
@@ -486,7 +486,7 @@ class TestUnionIntervalClass:
         (interval(1, 6, '[]') + interval(8, 10, '[]'), interval(2, 3, '[]') + interval(4, 7, '[]'),
          [interval(1, 7, '[]'), interval(8, 10, '[]')]),
     ))
-    def test__interval_unit_int__add__unit(self, interval1, interval2, interval_m):
+    def test__interval_int__add__unit(self, interval1, interval2, interval_m):
         """レンジ[int]()の加法演算 (合併) をテストする。
         """
         if isinstance(interval_m, list):
@@ -540,7 +540,7 @@ class TestUnionIntervalClass:
          interval(1.0, 1.5) + interval(1.7, 1.9) + interval(3.5, 4.0)),
 
     ))
-    def test__interval_unit_int__sub__unit(self, interval1, interval2, interval_r):
+    def test__interval_int__sub__unit(self, interval1, interval2, interval_r):
         """レンジ[int]()の減法演算 (差集合) をテストする。
         """
         assert interval1 - interval2 == interval_r
@@ -657,7 +657,7 @@ class TestUnionIntervalClass:
          interval(7, 8, '()') + interval(9, 10, '(]') + interval(15, 18, '[)')),
         (interval(5, 10, '(]') + interval(15, 20, '[)'), interval(empty=True), interval(empty=True)),
     ))
-    def test__interval_unit_int__mul(self, interval1, interval2, interval_m):
+    def test__interval_int__mul(self, interval1, interval2, interval_m):
         """レンジ[int]()の乗法演算 (交叉) をテストする。
         """
         assert interval1 * interval2 == interval_m
@@ -696,8 +696,7 @@ class TestUnionIntervalClass:
         (interval(0, 10, '[]') + interval(20, 30), interval(0, 11) + interval(25, 27), False),
         (interval(0, 10, '[]') + interval(20, 30), interval(0, 9) + interval(18, 35), False),
     ))
-    def test__interval_unit_int__issubset(self,
-                                          interval1: UnionInterval, interval2: UnionInterval, expected_issubset: bool):
+    def test__interval_int__issubset(self, interval1: UnionInterval, interval2: UnionInterval, expected_issubset: bool):
         """レンジ[int]()の包含判定をテストする。
         """
         if expected_issubset:
@@ -740,7 +739,7 @@ class TestUnionIntervalClass:
         (interval(None, 5, edge='()') + interval(5, 10, edge='()'),
          interval(5, 5, edge='[]') + interval(10, None, edge='[)')),
     ))
-    def test__interval_unit_int__complement(self, interval1: UnionInterval, interval2: UnionInterval):
+    def test__interval_int__complement(self, interval1: UnionInterval, interval2: UnionInterval):
         """レンジ[int]()の補集合をテストする。
         """
         assert interval1.complement() == interval2
@@ -760,7 +759,7 @@ class TestUnionIntervalClass:
         (interval(1, 5, edge='[]') + interval(7, None, edge='[]'), True, False),
         (interval(None, 5, edge='[]') + interval(7, None, edge='[]'), False, False),
     ))
-    def test__interval_unit_int__bound(self, interval1: UnionInterval, bounded_below, bounded_above):
+    def test__interval_int__bound(self, interval1: UnionInterval, bounded_below, bounded_above):
         """レンジ[int]()の有界判定をテストする。
         """
         assert interval1.is_bounded_below() == bounded_below
@@ -777,7 +776,7 @@ class TestUnionIntervalClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[]'), timedelta(seconds=1)),
         (interval(singleton=datetime(2020, 12, 30, 11, 22, 33)), timedelta(seconds=0)),
     ))
-    def test__interval_unit__measure(self, interval1: UnionInterval, measure):
+    def test__interval__measure(self, interval1: UnionInterval, measure):
         """レンジ()の測度関数をテストする。
         """
         assert interval1.measure() == measure
@@ -787,7 +786,7 @@ class TestUnionIntervalClass:
         0.0,
         timedelta(0),
     ))
-    def test__interval_unit__measure__zero(self, zero):
+    def test__interval__measure__zero(self, zero):
         """空の interval の測度関数をテストする。
         """
         assert interval(empty=True).measure(zero=zero) == zero
@@ -800,7 +799,7 @@ class TestUnionIntervalClass:
             interval(None, 2) + interval(5, 10),
             interval(None, 2) + interval(5, None),
     ))
-    def test__interval_unit__measure_err(self, interval1: UnionInterval):
+    def test__interval__measure_err(self, interval1: UnionInterval):
         """レンジ()の測度関数をテストする。
         """
         with pytest.raises(ValueError):
