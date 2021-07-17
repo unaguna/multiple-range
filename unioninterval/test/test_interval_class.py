@@ -89,7 +89,7 @@ class TestUnionIntervalClass:
          interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 31, 11, 22, 34)), False),
     ))
     def test__interval__equal(self, set_range_1, set_range_2, expected_equal):
-        """単レンジの等号演算をテストする。
+        """区間の等号演算をテストする。
         """
         if expected_equal:
             assert set_range_1 == set_range_2
@@ -181,7 +181,7 @@ class TestUnionIntervalClass:
          datetime(2100, 12, 30, 11, 22, 33), True),
     ))
     def test__interval__contain(self, set_range, element, expected_contain):
-        """単レンジの含有演算をテストする。
+        """区間の含有演算をテストする。
 
         端点と比較できるオブジェクトであれば、含有するかどうか確かめられる。
         """
@@ -229,7 +229,7 @@ class TestUnionIntervalClass:
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 32), '()'), True),
     ))
     def test__interval_empty__start_g_end(self, target, is_empty):
-        """端点の指定次第で単レンジが空になることをテストする。
+        """端点の指定次第で区間が空になることをテストする。
         """
         assert target.is_empty == is_empty
         if is_empty:
@@ -242,7 +242,7 @@ class TestUnionIntervalClass:
             assert target
 
     @pytest.mark.parametrize('interval1, interval2, interval_m', (
-        # 単レンジ同士で一方の終点ともう一方の始点が一致するパターン
+        # 区間同士で一方の終点ともう一方の始点が一致するパターン
         (interval(5, 6, '[]'), interval(6, 7, '[]'), interval(5, 7, '[]')),
         (interval(5, 6, '[)'), interval(6, 7, '[]'), interval(5, 7, '[]')),
         (interval(5, 6, '(]'), interval(6, 7, '[]'), interval(5, 7, '(]')),
@@ -279,7 +279,7 @@ class TestUnionIntervalClass:
         (interval(None, 6, '()'), interval(6, None, '[)'), interval(None, None, '()')),
         (interval(None, 6, '(]'), interval(6, None, '()'), interval(None, None, '()')),
         (interval(None, 6, '()'), interval(6, None, '()'), [interval(None, 6, '()'), interval(6, None, '()')]),
-        # 単レンジ同士で一方ともう一方に共通部分がないパターン
+        # 区間同士で一方ともう一方に共通部分がないパターン
         (interval(5, 6, '[]'), interval(7, 8, '[]'), [interval(5, 6, '[]'), interval(7, 8, '[]')]),
         (interval(5, 6, '[)'), interval(7, 8, '[]'), [interval(5, 6, '[)'), interval(7, 8, '[]')]),
         (interval(5, 6, '(]'), interval(7, 8, '[]'), [interval(5, 6, '(]'), interval(7, 8, '[]')]),
@@ -316,7 +316,7 @@ class TestUnionIntervalClass:
         (interval(None, 6, '()'), interval(7, None, '[)'), [interval(None, 6, '()'), interval(7, None, '[)')]),
         (interval(None, 6, '(]'), interval(7, None, '()'), [interval(None, 6, '(]'), interval(7, None, '()')]),
         (interval(None, 6, '()'), interval(7, None, '()'), [interval(None, 6, '()'), interval(7, None, '()')]),
-        # 単レンジ同士で一方ともう一方にシングルトンでない共通部分があるパターン
+        # 区間同士で一方ともう一方にシングルトンでない共通部分があるパターン
         (interval(5, 7, '[]'), interval(6, 8, '[]'), interval(5, 8, '[]')),
         (interval(5, 7, '[)'), interval(6, 8, '[]'), interval(5, 8, '[]')),
         (interval(5, 7, '(]'), interval(6, 8, '[]'), interval(5, 8, '(]')),
@@ -355,7 +355,7 @@ class TestUnionIntervalClass:
         (interval(5, None, '[)'), interval(empty=True), interval(5, None, '[)')),
         (interval(None, None, '()'), interval(empty=True), interval(None, None, '()')),
         (interval(empty=True), interval(empty=True), interval(empty=True)),
-        # 一方が単レンジでないパターン
+        # 一方が区間でないパターン
         (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(3, 5, '[]'),
          [interval(3, 6, '[]'), interval(8, 10, '[]')]),
         (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(3, 5, '[]'),
@@ -388,7 +388,7 @@ class TestUnionIntervalClass:
          [interval(3, 6, '(]'), interval(8, 10, '[]')]),
         (interval(4, 6, '()') + interval(8, 10, '[]'), interval(3, 5, '()'),
          [interval(3, 6, '()'), interval(8, 10, '[]')]),
-        # 一方が単レンジでないパターン
+        # 一方が区間でないパターン
         (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
         (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '[]')),
         (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '(]'), interval(4, 10, '[]')),
@@ -484,7 +484,7 @@ class TestUnionIntervalClass:
 
         (interval(4, 6, '[]') + interval(8, 10, '[]') + interval(12, 14, '[]'), interval(6, 12, '[]'),
          interval(4, 14, '[]')),
-        # 双方が単レンジでないパターン
+        # 双方が区間でないパターン
         (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(7, 7, '[]') + interval(11, 12, '[]'),
          [interval(4, 6, '[]'), interval(7, 7, '[]'), interval(8, 10, '[]'), interval(11, 12, '[]')]),
         (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(5, 7, '[]') + interval(11, 12, '[]'),
@@ -495,7 +495,7 @@ class TestUnionIntervalClass:
          [interval(1, 7, '[]'), interval(8, 10, '[]')]),
     ))
     def test__interval_int__add__unit(self, interval1, interval2, interval_m):
-        """レンジ[int]()の加法演算 (合併) をテストする。
+        """UnionInterval[int]()の加法演算 (合併) をテストする。
         """
         if isinstance(interval_m, list):
             result = interval2 + interval1
@@ -549,7 +549,7 @@ class TestUnionIntervalClass:
 
     ))
     def test__interval_int__sub__unit(self, interval1, interval2, interval_r):
-        """レンジ[int]()の減法演算 (差集合) をテストする。
+        """UnionInterval[int]()の減法演算 (差集合) をテストする。
         """
         assert interval1 - interval2 == interval_r
 
@@ -591,7 +591,7 @@ class TestUnionIntervalClass:
         (interval(None, None, '()'), interval(7, 9, '[)'), interval(7, 9, '[)')),
         (interval(None, None, '()'), interval(7, 9, '(]'), interval(7, 9, '(]')),
         (interval(None, None, '()'), interval(7, 9, '()'), interval(7, 9, '()')),
-        # 共通部分が無いパターン (ただしオペランドが空の単レンジでない)
+        # 共通部分が無いパターン (ただしオペランドが空の区間でない)
         (interval(5, 6, '[]'), interval(7, 9, '[]'), interval(empty=True)),
         (interval(5, 6, '[)'), interval(7, 9, '[]'), interval(empty=True)),
         (interval(5, 6, '(]'), interval(7, 9, '[]'), interval(empty=True)),
@@ -628,7 +628,7 @@ class TestUnionIntervalClass:
         (interval(None, 6, '()'), interval(7, None, '[)'), interval(empty=True)),
         (interval(None, 6, '(]'), interval(7, None, '()'), interval(empty=True)),
         (interval(None, 6, '()'), interval(7, None, '()'), interval(empty=True)),
-        # 少なくとも一方が空の単レンジであるパターン
+        # 少なくとも一方が空の区間であるパターン
         (interval(empty=True), interval(7, 9, '[]'), interval(empty=True)),
         (interval(empty=True), interval(7, 9, '[)'), interval(empty=True)),
         (interval(empty=True), interval(7, 9, '(]'), interval(empty=True)),
@@ -660,13 +660,13 @@ class TestUnionIntervalClass:
         (interval(5, 9, '[]'), interval(9, 12, '[)'), interval(9, 9, '[]')),
         (interval(5, 9, '(]'), interval(9, 12, '[]'), interval(9, 9, '[]')),
         (interval(5, 9, '[]'), interval(9, 12, '[]'), interval(9, 9, '[]')),
-        # オペランドが単レンジでない場合
+        # オペランドが区間でない場合
         (interval(5, 10, '(]') + interval(15, 20, '[)'), interval(7, 8, '()') + interval(9, 18, '()'),
          interval(7, 8, '()') + interval(9, 10, '(]') + interval(15, 18, '[)')),
         (interval(5, 10, '(]') + interval(15, 20, '[)'), interval(empty=True), interval(empty=True)),
     ))
     def test__interval_int__mul(self, interval1, interval2, interval_m):
-        """レンジ[int]()の乗法演算 (交叉) をテストする。
+        """UnionInterval[int]()の乗法演算 (交叉) をテストする。
         """
         assert interval1 * interval2 == interval_m
         assert interval2 * interval1 == interval_m
@@ -705,7 +705,7 @@ class TestUnionIntervalClass:
         (interval(0, 10, '[]') + interval(20, 30), interval(0, 9) + interval(18, 35), False),
     ))
     def test__interval_int__issubset(self, interval1: UnionInterval, interval2: UnionInterval, expected_issubset: bool):
-        """レンジ[int]()の包含判定をテストする。
+        """UnionInterval[int]()の包含判定をテストする。
         """
         if expected_issubset:
             assert interval1.issubset(interval2)
@@ -748,7 +748,7 @@ class TestUnionIntervalClass:
          interval(5, 5, edge='[]') + interval(10, None, edge='[)')),
     ))
     def test__interval_int__complement(self, interval1: UnionInterval, interval2: UnionInterval):
-        """レンジ[int]()の補集合をテストする。
+        """UnionInterval[int]()の補集合をテストする。
         """
         assert interval1.complement() == interval2
         assert interval2.complement() == interval1
@@ -768,7 +768,7 @@ class TestUnionIntervalClass:
         (interval(None, 5, edge='[]') + interval(7, None, edge='[]'), False, False),
     ))
     def test__interval_int__bound(self, interval1: UnionInterval, bounded_below, bounded_above):
-        """レンジ[int]()の有界判定をテストする。
+        """UnionInterval[int]()の有界判定をテストする。
         """
         assert interval1.is_bounded_below() == bounded_below
         assert interval1.is_bounded_above() == bounded_above
@@ -785,7 +785,7 @@ class TestUnionIntervalClass:
         (interval(singleton=datetime(2020, 12, 30, 11, 22, 33)), timedelta(seconds=0)),
     ))
     def test__interval__measure(self, interval1: UnionInterval, measure):
-        """レンジ()の測度関数をテストする。
+        """UnionInterval()の測度関数をテストする。
         """
         assert interval1.measure() == measure
 
@@ -808,7 +808,7 @@ class TestUnionIntervalClass:
             interval(None, 2) + interval(5, None),
     ))
     def test__interval__measure_err(self, interval1: UnionInterval):
-        """レンジ()の測度関数をテストする。
+        """UnionInterval()の測度関数をテストする。
         """
         with pytest.raises(ValueError):
             interval1.measure()
