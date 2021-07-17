@@ -28,6 +28,10 @@ class TestUnionIntervalClass:
         (interval(5, 10, edge='[)'), '[5, 10)'),
         (interval(5, 10, edge='(]'), '(5, 10]'),
         (interval(5, 10, edge='()'), '(5, 10)'),
+        (interval(5.0, 10.0, edge='[]'), '[5.0, 10.0]'),
+        (interval(5.0, 10.0, edge='[)'), '[5.0, 10.0)'),
+        (interval(5.0, 10.0, edge='(]'), '(5.0, 10.0]'),
+        (interval(5.0, 10.0, edge='()'), '(5.0, 10.0)'),
         (interval(None, 10, edge='[]'), '(-inf, 10]'),
         (interval(None, 10, edge='[)'), '(-inf, 10)'),
         (interval(None, 10, edge='(]'), '(-inf, 10]'),
@@ -40,9 +44,13 @@ class TestUnionIntervalClass:
         (interval(None, None, edge='[)'), '(-inf, inf)'),
         (interval(None, None, edge='(]'), '(-inf, inf)'),
         (interval(None, None, edge='()'), '(-inf, inf)'),
+        (interval(5, 10, edge='[]') + interval(15, 20, edge='[)'), '[5, 10]∪[15, 20)'),
+        (interval(5, 10, edge='[)') + interval(15, 20, edge='[)'), '[5, 10)∪[15, 20)'),
+        (interval(5, 10, edge='(]') + interval(15, 20, edge='[)'), '(5, 10]∪[15, 20)'),
+        (interval(5, 10, edge='()') + interval(15, 20, edge='[)'), '(5, 10)∪[15, 20)'),
     ))
-    def test__interval_int__str(self, set_range, expected_str):
-        """単レンジ[int]の文字列化をテストする。
+    def test__interval__str(self, set_range, expected_str):
+        """UnionInterval の文字列化をテストする。
         """
         assert str(set_range) == expected_str
 
