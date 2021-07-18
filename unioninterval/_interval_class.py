@@ -336,7 +336,7 @@ class UnionInterval(Generic[T]):
         else:
             return NotImplemented
 
-    def __mul__(self, other):
+    def __and__(self, other):
         """集合論における交叉演算
 
         Returns
@@ -514,15 +514,15 @@ class UnionInterval(Generic[T]):
         >>> from unioninterval as interval
         >>> ui: UnionInterval # = ...
         >>> if ui.min() is not None:
-        >>>     assert (ui * interval(None, ui.min(), edge='()')).is_empty
+        >>>     assert (ui & interval(None, ui.min(), edge='()')).is_empty
         >>>     assert ui.min() == ui.inf()
         >>> if ui.inf() is not None:
-        >>>     assert (ui * interval(None, ui.inf(), edge='()')).is_empty
+        >>>     assert (ui & interval(None, ui.inf(), edge='()')).is_empty
         >>> if ui.max() is not None:
-        >>>     assert (ui * interval(ui.max(), None, edge='()')).is_empty
+        >>>     assert (ui & interval(ui.max(), None, edge='()')).is_empty
         >>>     assert ui.max() == ui.sup()
         >>> if ui.sup() is not None:
-        >>>     assert (ui * interval(ui.sup(), None, edge='()')).is_empty
+        >>>     assert (ui & interval(ui.sup(), None, edge='()')).is_empty
 
         inf (sup) と min (max) の違いは、min のみ下記の性質も併せ持つという点です。
         >>> from unioninterval as interval
@@ -575,10 +575,10 @@ class UnionInterval(Generic[T]):
         >>> ui: UnionInterval # = ...
         >>> if ui.min() is not None:
         >>>     assert ui.min() in ui
-        >>>     assert (ui * interval(None, ui.min(), edge='()')).is_empty
+        >>>     assert (ui & interval(None, ui.min(), edge='()')).is_empty
         >>> if ui.max() is not None:
         >>>     assert ui.max() in ui
-        >>>     assert (ui * interval(ui.max(), None, edge='()')).is_empty
+        >>>     assert (ui & interval(ui.max(), None, edge='()')).is_empty
 
         このことは、たとえば 1 (3) が interval(1, 3, '()') の最小値 (最大値) にならないことを意味します
         (実際、1 in interval(1, 3, '()') や 3 in interval(1, 3, '()' が満たされない)。

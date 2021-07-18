@@ -670,8 +670,8 @@ class TestUnionIntervalClass:
     def test__interval_int__mul(self, interval1, interval2, interval_m):
         """UnionInterval[int]()の乗法演算 (交叉) をテストする。
         """
-        assert interval1 * interval2 == interval_m
-        assert interval2 * interval1 == interval_m
+        assert interval1 & interval2 == interval_m
+        assert interval2 & interval1 == interval_m
 
     @pytest.mark.parametrize('interval1, interval2, expected_issubset', (
         (interval(5, 10), interval(0, 20), True),
