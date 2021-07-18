@@ -273,7 +273,7 @@ class UnionInterval(Generic[T]):
     def __len__(self) -> int:
         return len(self._unit_list)
 
-    def __add__(self, other):
+    def __or__(self, other):
         """集合論における合併演算
 
         Returns
@@ -332,7 +332,7 @@ class UnionInterval(Generic[T]):
         UnionInterval[T]
         """
         if isinstance(other, UnionInterval):
-            return (self.complement() + other).complement()
+            return (self.complement() | other).complement()
         else:
             return NotImplemented
 
@@ -386,7 +386,7 @@ class UnionInterval(Generic[T]):
             すべての要素が other に含まれれば True、そうでない場合は False。
         """
         if isinstance(other, UnionInterval):
-            return self + other == other
+            return self | other == other
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issubset: \'{type(other)}\'')
 
@@ -404,7 +404,7 @@ class UnionInterval(Generic[T]):
             other のすべての要素が含まれれば True、そうでない場合は False。
         """
         if isinstance(other, UnionInterval):
-            return self + other == self
+            return self | other == self
         else:
             raise TypeError(f'unsupported argument type for {type(self)}.issuperset: \'{type(other)}\'')
 

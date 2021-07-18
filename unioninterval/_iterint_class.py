@@ -1,6 +1,8 @@
 import abc
 import math
+import operator
 from abc import abstractmethod
+from functools import reduce
 
 from ._interval_class import UnionInterval
 from ._interval_function import interval
@@ -64,7 +66,7 @@ class _UnionRangeForward(UnionRange):
 
     def _normalize_int_interval(self, union_interval: UnionInterval) -> UnionInterval[int]:
         if not union_interval.is_interval:
-            return sum(map(self._normalize_int_interval, union_interval), interval(empty=True))
+            return reduce(operator.or_, map(self._normalize_int_interval, union_interval), interval(empty=True))
         else:
             if union_interval.is_empty:
                 return union_interval
@@ -105,7 +107,7 @@ class _UnionRangeReversed(UnionRange):
 
     def _normalize_int_interval(self, union_interval: UnionInterval) -> UnionInterval[int]:
         if not union_interval.is_interval:
-            return sum(map(self._normalize_int_interval, union_interval), interval(empty=True))
+            return reduce(operator.or_, map(self._normalize_int_interval, union_interval), interval(empty=True))
         else:
             if union_interval.is_empty:
                 return union_interval

@@ -19,10 +19,10 @@ class TestIterint:
         (interval(1, 10, edge='[]'), interval(0.9, 10.1, edge='[)'), True),
         (interval(1, 10, edge='[]'), interval(0.9, 10.1, edge='(]'), True),
         (interval(1, 10, edge='[]'), interval(0.9, 10.1, edge='()'), True),
-        (interval(1, 3, edge='[]') + interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), True),
-        (interval(1, 3, edge='[)') + interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), False),
-        (interval(1, 3, edge='[)') + interval(4, 6, edge='[]'),
-         interval(1, 3, edge='[)') + interval(4, 7, edge='[)'), True),
+        (interval(1, 3, edge='[]') | interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), True),
+        (interval(1, 3, edge='[)') | interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), False),
+        (interval(1, 3, edge='[)') | interval(4, 6, edge='[]'),
+         interval(1, 3, edge='[)') | interval(4, 7, edge='[)'), True),
         (interval(1, 2, edge='[)'), interval(singleton=1), True),
         (interval(1, 2, edge='(]'), interval(singleton=2), True),
         (interval(1, 2, edge='()'), interval(empty=True), True),
@@ -51,10 +51,10 @@ class TestIterint:
         (interval(1, 10, edge='[]'), interval(0.9, 10.1, edge='[)'), True),
         (interval(1, 10, edge='[]'), interval(0.9, 10.1, edge='(]'), True),
         (interval(1, 10, edge='[]'), interval(0.9, 10.1, edge='()'), True),
-        (interval(1, 3, edge='[]') + interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), True),
-        (interval(1, 3, edge='[)') + interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), False),
-        (interval(1, 3, edge='[)') + interval(4, 6, edge='[]'),
-         interval(1, 3, edge='[)') + interval(4, 7, edge='[)'), True),
+        (interval(1, 3, edge='[]') | interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), True),
+        (interval(1, 3, edge='[)') | interval(4, 6, edge='[]'), interval(1, 6, edge='[]'), False),
+        (interval(1, 3, edge='[)') | interval(4, 6, edge='[]'),
+         interval(1, 3, edge='[)') | interval(4, 7, edge='[)'), True),
         (interval(1, 2, edge='[)'), interval(singleton=1), True),
         (interval(1, 2, edge='(]'), interval(singleton=2), True),
     ))
@@ -83,10 +83,10 @@ class TestIterint:
         (interval(0.9, 5.1, edge='[)'), [1, 2, 3, 4, 5]),
         (interval(0.9, 5.1, edge='(]'), [1, 2, 3, 4, 5]),
         (interval(0.9, 5.1, edge='()'), [1, 2, 3, 4, 5]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[]'), [1, 2, 3, 5, 6, 7]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[)'), [1, 2, 3, 5, 6]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [1, 2, 3, 6, 7]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [1, 2, 3, 6]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[]'), [1, 2, 3, 5, 6, 7]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[)'), [1, 2, 3, 5, 6]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='(]'), [1, 2, 3, 6, 7]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='()'), [1, 2, 3, 6]),
     ))
     def test__iterint__iter(self, interval1: UnionInterval, int_list):
         """iterint のイテレータをテストする。
@@ -103,10 +103,10 @@ class TestIterint:
         (interval(0.9, 5.1, edge='[)'), [5, 4, 3, 2, 1]),
         (interval(0.9, 5.1, edge='(]'), [5, 4, 3, 2, 1]),
         (interval(0.9, 5.1, edge='()'), [5, 4, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[]'), [7, 6, 5, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[)'), [6, 5, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [7, 6, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [6, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[]'), [7, 6, 5, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[)'), [6, 5, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='(]'), [7, 6, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='()'), [6, 3, 2, 1]),
     ))
     def test__iterint__iter__reversed(self, interval1: UnionInterval, int_list):
         """iterint の逆順イテレータをテストする。
@@ -123,10 +123,10 @@ class TestIterint:
         (interval(0.9, 5.1, edge='[)'), [5, 4, 3, 2, 1]),
         (interval(0.9, 5.1, edge='(]'), [5, 4, 3, 2, 1]),
         (interval(0.9, 5.1, edge='()'), [5, 4, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[]'), [7, 6, 5, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[)'), [6, 5, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [7, 6, 3, 2, 1]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [6, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[]'), [7, 6, 5, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[)'), [6, 5, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='(]'), [7, 6, 3, 2, 1]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='()'), [6, 3, 2, 1]),
     ))
     def test__iterint__reverse__iter(self, interval1: UnionInterval, int_list):
         """逆順 iterint のイテレータをテストする。
@@ -143,10 +143,10 @@ class TestIterint:
         (interval(0.9, 5.1, edge='[)'), [1, 2, 3, 4, 5]),
         (interval(0.9, 5.1, edge='(]'), [1, 2, 3, 4, 5]),
         (interval(0.9, 5.1, edge='()'), [1, 2, 3, 4, 5]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[]'), [1, 2, 3, 5, 6, 7]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='[)'), [1, 2, 3, 5, 6]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='(]'), [1, 2, 3, 6, 7]),
-        (interval(1, 3, edge='[]') + interval(5, 7, edge='()'), [1, 2, 3, 6]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[]'), [1, 2, 3, 5, 6, 7]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='[)'), [1, 2, 3, 5, 6]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='(]'), [1, 2, 3, 6, 7]),
+        (interval(1, 3, edge='[]') | interval(5, 7, edge='()'), [1, 2, 3, 6]),
     ))
     def test__iterint__reverse__iter__reversed(self, interval1: UnionInterval, int_list):
         """逆順 iterint の逆順イテレータをテストする。
