@@ -1,7 +1,7 @@
 import operator
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Reversible
 
 import pytest
 
@@ -838,6 +838,20 @@ class TestUnionIntervalClass:
             interval2: UnionInterval = reduce(operator.or_, intervals[1:], interval(empty=True))
             assert isinstance(interval1[1:], UnionInterval)
             assert interval1[1:] == interval2
+
+    @pytest.mark.parametrize('intervals', (
+        tuple(),
+        (interval(1, 3),),
+        (interval(singleton=5),),
+        (interval(1, 3), interval(5, 7)),
+        (interval(1, 3), interval(5, 7), interval(10, 15)),
+    ))
+    def test__interval__reversed(self, intervals: Sequence[UnionInterval]):
+        """UnionInterval の __reversed__ をテストする
+        """
+        interval1: UnionInterval = reduce(operator.or_, intervals, interval(empty=True))
+        assert isinstance(interval1, Reversible)
+        assert list(reversed(interval1)) == list(reversed(intervals))
 
     @pytest.mark.parametrize('interval1, is_interval', (
         (interval(empty=True), True),

@@ -264,6 +264,10 @@ class UnionInterval(Generic[T]):
         for unit in self._unit_list:
             yield UnionInterval(unit)
 
+    def __reversed__(self):
+        for unit in reversed(self._unit_list):
+            yield UnionInterval(unit)
+
     def __getitem__(self, item: int):
         if isinstance(item, slice):
             return UnionInterval(*self._unit_list[item])
