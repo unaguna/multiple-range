@@ -1,4 +1,6 @@
+import operator
 from datetime import datetime, timedelta
+from functools import reduce
 from typing import Iterable, Sequence
 
 import pytest
@@ -44,10 +46,10 @@ class TestUnionIntervalClass:
         (interval(None, None, edge='[)'), '(-inf, inf)'),
         (interval(None, None, edge='(]'), '(-inf, inf)'),
         (interval(None, None, edge='()'), '(-inf, inf)'),
-        (interval(5, 10, edge='[]') + interval(15, 20, edge='[)'), '[5, 10]∪[15, 20)'),
-        (interval(5, 10, edge='[)') + interval(15, 20, edge='[)'), '[5, 10)∪[15, 20)'),
-        (interval(5, 10, edge='(]') + interval(15, 20, edge='[)'), '(5, 10]∪[15, 20)'),
-        (interval(5, 10, edge='()') + interval(15, 20, edge='[)'), '(5, 10)∪[15, 20)'),
+        (interval(5, 10, edge='[]') | interval(15, 20, edge='[)'), '[5, 10]∪[15, 20)'),
+        (interval(5, 10, edge='[)') | interval(15, 20, edge='[)'), '[5, 10)∪[15, 20)'),
+        (interval(5, 10, edge='(]') | interval(15, 20, edge='[)'), '(5, 10]∪[15, 20)'),
+        (interval(5, 10, edge='()') | interval(15, 20, edge='[)'), '(5, 10)∪[15, 20)'),
     ))
     def test__interval__str(self, set_range, expected_str):
         """UnionInterval の文字列化をテストする。
@@ -356,169 +358,169 @@ class TestUnionIntervalClass:
         (interval(None, None, '()'), interval(empty=True), interval(None, None, '()')),
         (interval(empty=True), interval(empty=True), interval(empty=True)),
         # 一方が区間でないパターン
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(3, 5, '[]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(3, 5, '[]'),
          [interval(3, 6, '[]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(3, 5, '[]'),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(3, 5, '[]'),
          [interval(3, 6, '[)'), interval(8, 10, '[]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(3, 5, '[]'),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(3, 5, '[]'),
          [interval(3, 6, '[]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(3, 5, '[]'),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(3, 5, '[]'),
          [interval(3, 6, '[)'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(3, 5, '[)'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(3, 5, '[)'),
          [interval(3, 6, '[]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(3, 5, '[)'),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(3, 5, '[)'),
          [interval(3, 6, '[)'), interval(8, 10, '[]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(3, 5, '[)'),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(3, 5, '[)'),
          [interval(3, 6, '[]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(3, 5, '[)'),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(3, 5, '[)'),
          [interval(3, 6, '[)'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(3, 5, '(]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(3, 5, '(]'),
          [interval(3, 6, '(]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(3, 5, '(]'),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(3, 5, '(]'),
          [interval(3, 6, '()'), interval(8, 10, '[]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(3, 5, '(]'),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(3, 5, '(]'),
          [interval(3, 6, '(]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(3, 5, '(]'),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(3, 5, '(]'),
          [interval(3, 6, '()'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(3, 5, '()'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(3, 5, '()'),
          [interval(3, 6, '(]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(3, 5, '()'),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(3, 5, '()'),
          [interval(3, 6, '()'), interval(8, 10, '[]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(3, 5, '()'),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(3, 5, '()'),
          [interval(3, 6, '(]'), interval(8, 10, '[]')]),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(3, 5, '()'),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(3, 5, '()'),
          [interval(3, 6, '()'), interval(8, 10, '[]')]),
         # 一方が区間でないパターン
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '[]')),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '(]'), interval(4, 10, '[]')),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(6, 8, '()'), interval(4, 10, '[]')),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '[]')),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(6, 8, '(]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '[]')),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(6, 8, '(]'), interval(4, 10, '[]')),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(6, 8, '()'), interval(4, 10, '[]')),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '[]')),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(6, 8, '(]'),
          [interval(4, 6, '[)'), interval(6, 10, '(]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '[]'), interval(6, 8, '()'),
+        (interval(4, 6, '[)') | interval(8, 10, '[]'), interval(6, 8, '()'),
          [interval(4, 6, '[)'), interval(6, 10, '(]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '(]')),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(6, 8, '(]'), interval(4, 10, '(]')),
-        (interval(4, 6, '(]') + interval(8, 10, '[]'), interval(6, 8, '()'), interval(4, 10, '(]')),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '(]')),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(6, 8, '(]'),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '(]')),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(6, 8, '(]'), interval(4, 10, '(]')),
+        (interval(4, 6, '(]') | interval(8, 10, '[]'), interval(6, 8, '()'), interval(4, 10, '(]')),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(6, 8, '[)'), interval(4, 10, '(]')),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(6, 8, '(]'),
          [interval(4, 6, '()'), interval(6, 10, '(]')]),
-        (interval(4, 6, '()') + interval(8, 10, '[]'), interval(6, 8, '()'),
+        (interval(4, 6, '()') | interval(8, 10, '[]'), interval(6, 8, '()'),
          [interval(4, 6, '()'), interval(6, 10, '(]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '[)')),
-        (interval(4, 6, '[]') + interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '[)')),
-        (interval(4, 6, '[]') + interval(8, 10, '[)'), interval(6, 8, '(]'), interval(4, 10, '[)')),
-        (interval(4, 6, '[]') + interval(8, 10, '[)'), interval(6, 8, '()'), interval(4, 10, '[)')),
-        (interval(4, 6, '[)') + interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '[)')),
-        (interval(4, 6, '[)') + interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '[)')),
-        (interval(4, 6, '[)') + interval(8, 10, '[)'), interval(6, 8, '(]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '[)')),
+        (interval(4, 6, '[]') | interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '[)')),
+        (interval(4, 6, '[]') | interval(8, 10, '[)'), interval(6, 8, '(]'), interval(4, 10, '[)')),
+        (interval(4, 6, '[]') | interval(8, 10, '[)'), interval(6, 8, '()'), interval(4, 10, '[)')),
+        (interval(4, 6, '[)') | interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '[)')),
+        (interval(4, 6, '[)') | interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '[)')),
+        (interval(4, 6, '[)') | interval(8, 10, '[)'), interval(6, 8, '(]'),
          [interval(4, 6, '[)'), interval(6, 10, '()')]),
-        (interval(4, 6, '[)') + interval(8, 10, '[)'), interval(6, 8, '()'),
+        (interval(4, 6, '[)') | interval(8, 10, '[)'), interval(6, 8, '()'),
          [interval(4, 6, '[)'), interval(6, 10, '()')]),
-        (interval(4, 6, '(]') + interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '()')),
-        (interval(4, 6, '(]') + interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '()')),
-        (interval(4, 6, '(]') + interval(8, 10, '[)'), interval(6, 8, '(]'), interval(4, 10, '()')),
-        (interval(4, 6, '(]') + interval(8, 10, '[)'), interval(6, 8, '()'), interval(4, 10, '()')),
-        (interval(4, 6, '()') + interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '()')),
-        (interval(4, 6, '()') + interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '()')),
-        (interval(4, 6, '()') + interval(8, 10, '[)'), interval(6, 8, '(]'),
+        (interval(4, 6, '(]') | interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '()')),
+        (interval(4, 6, '(]') | interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '()')),
+        (interval(4, 6, '(]') | interval(8, 10, '[)'), interval(6, 8, '(]'), interval(4, 10, '()')),
+        (interval(4, 6, '(]') | interval(8, 10, '[)'), interval(6, 8, '()'), interval(4, 10, '()')),
+        (interval(4, 6, '()') | interval(8, 10, '[)'), interval(6, 8, '[]'), interval(4, 10, '()')),
+        (interval(4, 6, '()') | interval(8, 10, '[)'), interval(6, 8, '[)'), interval(4, 10, '()')),
+        (interval(4, 6, '()') | interval(8, 10, '[)'), interval(6, 8, '(]'),
          [interval(4, 6, '()'), interval(6, 10, '()')]),
-        (interval(4, 6, '()') + interval(8, 10, '[)'), interval(6, 8, '()'),
+        (interval(4, 6, '()') | interval(8, 10, '[)'), interval(6, 8, '()'),
          [interval(4, 6, '()'), interval(6, 10, '()')]),
-        (interval(4, 6, '[]') + interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
-        (interval(4, 6, '[]') + interval(8, 10, '(]'), interval(6, 8, '[)'),
+        (interval(4, 6, '[]') | interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
+        (interval(4, 6, '[]') | interval(8, 10, '(]'), interval(6, 8, '[)'),
          [interval(4, 8, '[)'), interval(8, 10, '(]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '(]'), interval(6, 8, '(]'), interval(4, 10, '[]')),
-        (interval(4, 6, '[]') + interval(8, 10, '(]'), interval(6, 8, '()'),
+        (interval(4, 6, '[]') | interval(8, 10, '(]'), interval(6, 8, '(]'), interval(4, 10, '[]')),
+        (interval(4, 6, '[]') | interval(8, 10, '(]'), interval(6, 8, '()'),
          [interval(4, 8, '[)'), interval(8, 10, '(]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
-        (interval(4, 6, '[)') + interval(8, 10, '(]'), interval(6, 8, '[)'),
+        (interval(4, 6, '[)') | interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '[]')),
+        (interval(4, 6, '[)') | interval(8, 10, '(]'), interval(6, 8, '[)'),
          [interval(4, 8, '[)'), interval(8, 10, '(]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '(]'), interval(6, 8, '(]'),
+        (interval(4, 6, '[)') | interval(8, 10, '(]'), interval(6, 8, '(]'),
          [interval(4, 6, '[)'), interval(6, 10, '(]')]),
-        (interval(4, 6, '[)') + interval(8, 10, '(]'), interval(6, 8, '()'),
+        (interval(4, 6, '[)') | interval(8, 10, '(]'), interval(6, 8, '()'),
          [interval(4, 6, '[)'), interval(6, 8, '()'), interval(8, 10, '(]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
-        (interval(4, 6, '(]') + interval(8, 10, '(]'), interval(6, 8, '[)'),
+        (interval(4, 6, '(]') | interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
+        (interval(4, 6, '(]') | interval(8, 10, '(]'), interval(6, 8, '[)'),
          [interval(4, 8, '()'), interval(8, 10, '(]')]),
-        (interval(4, 6, '(]') + interval(8, 10, '(]'), interval(6, 8, '(]'), interval(4, 10, '(]')),
-        (interval(4, 6, '(]') + interval(8, 10, '(]'), interval(6, 8, '()'),
+        (interval(4, 6, '(]') | interval(8, 10, '(]'), interval(6, 8, '(]'), interval(4, 10, '(]')),
+        (interval(4, 6, '(]') | interval(8, 10, '(]'), interval(6, 8, '()'),
          [interval(4, 8, '()'), interval(8, 10, '(]')]),
-        (interval(4, 6, '()') + interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
-        (interval(4, 6, '()') + interval(8, 10, '(]'), interval(6, 8, '[)'),
+        (interval(4, 6, '()') | interval(8, 10, '(]'), interval(6, 8, '[]'), interval(4, 10, '(]')),
+        (interval(4, 6, '()') | interval(8, 10, '(]'), interval(6, 8, '[)'),
          [interval(4, 8, '()'), interval(8, 10, '(]')]),
-        (interval(4, 6, '()') + interval(8, 10, '(]'), interval(6, 8, '(]'),
+        (interval(4, 6, '()') | interval(8, 10, '(]'), interval(6, 8, '(]'),
          [interval(4, 6, '()'), interval(6, 10, '(]')]),
-        (interval(4, 6, '()') + interval(8, 10, '(]'), interval(6, 8, '()'),
+        (interval(4, 6, '()') | interval(8, 10, '(]'), interval(6, 8, '()'),
          [interval(4, 6, '()'), interval(6, 8, '()'), interval(8, 10, '(]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '[)')),
-        (interval(4, 6, '[]') + interval(8, 10, '()'), interval(6, 8, '[)'),
+        (interval(4, 6, '[]') | interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '[)')),
+        (interval(4, 6, '[]') | interval(8, 10, '()'), interval(6, 8, '[)'),
          [interval(4, 8, '[)'), interval(8, 10, '()')]),
-        (interval(4, 6, '[]') + interval(8, 10, '()'), interval(6, 8, '(]'), interval(4, 10, '[)')),
-        (interval(4, 6, '[]') + interval(8, 10, '()'), interval(6, 8, '()'),
+        (interval(4, 6, '[]') | interval(8, 10, '()'), interval(6, 8, '(]'), interval(4, 10, '[)')),
+        (interval(4, 6, '[]') | interval(8, 10, '()'), interval(6, 8, '()'),
          [interval(4, 8, '[)'), interval(8, 10, '()')]),
-        (interval(4, 6, '[)') + interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '[)')),
-        (interval(4, 6, '[)') + interval(8, 10, '()'), interval(6, 8, '[)'),
+        (interval(4, 6, '[)') | interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '[)')),
+        (interval(4, 6, '[)') | interval(8, 10, '()'), interval(6, 8, '[)'),
          [interval(4, 8, '[)'), interval(8, 10, '()')]),
-        (interval(4, 6, '[)') + interval(8, 10, '()'), interval(6, 8, '(]'),
+        (interval(4, 6, '[)') | interval(8, 10, '()'), interval(6, 8, '(]'),
          [interval(4, 6, '[)'), interval(6, 10, '()')]),
-        (interval(4, 6, '[)') + interval(8, 10, '()'), interval(6, 8, '()'),
+        (interval(4, 6, '[)') | interval(8, 10, '()'), interval(6, 8, '()'),
          [interval(4, 6, '[)'), interval(6, 8, '()'), interval(8, 10, '()')]),
-        (interval(4, 6, '(]') + interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '()')),
-        (interval(4, 6, '(]') + interval(8, 10, '()'), interval(6, 8, '[)'),
+        (interval(4, 6, '(]') | interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '()')),
+        (interval(4, 6, '(]') | interval(8, 10, '()'), interval(6, 8, '[)'),
          [interval(4, 8, '()'), interval(8, 10, '()')]),
-        (interval(4, 6, '(]') + interval(8, 10, '()'), interval(6, 8, '(]'), interval(4, 10, '()')),
-        (interval(4, 6, '(]') + interval(8, 10, '()'), interval(6, 8, '()'),
+        (interval(4, 6, '(]') | interval(8, 10, '()'), interval(6, 8, '(]'), interval(4, 10, '()')),
+        (interval(4, 6, '(]') | interval(8, 10, '()'), interval(6, 8, '()'),
          [interval(4, 8, '()'), interval(8, 10, '()')]),
-        (interval(4, 6, '()') + interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '()')),
-        (interval(4, 6, '()') + interval(8, 10, '()'), interval(6, 8, '[)'),
+        (interval(4, 6, '()') | interval(8, 10, '()'), interval(6, 8, '[]'), interval(4, 10, '()')),
+        (interval(4, 6, '()') | interval(8, 10, '()'), interval(6, 8, '[)'),
          [interval(4, 8, '()'), interval(8, 10, '()')]),
-        (interval(4, 6, '()') + interval(8, 10, '()'), interval(6, 8, '(]'),
+        (interval(4, 6, '()') | interval(8, 10, '()'), interval(6, 8, '(]'),
          [interval(4, 6, '()'), interval(6, 10, '()')]),
-        (interval(4, 6, '()') + interval(8, 10, '()'), interval(6, 8, '()'),
+        (interval(4, 6, '()') | interval(8, 10, '()'), interval(6, 8, '()'),
          [interval(4, 6, '()'), interval(6, 8, '()'), interval(8, 10, '()')]),
 
-        (interval(4, 6, '[]') + interval(8, 10, '[]') + interval(12, 14, '[]'), interval(6, 12, '[]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]') | interval(12, 14, '[]'), interval(6, 12, '[]'),
          interval(4, 14, '[]')),
         # 双方が区間でないパターン
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(7, 7, '[]') + interval(11, 12, '[]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(7, 7, '[]') | interval(11, 12, '[]'),
          [interval(4, 6, '[]'), interval(7, 7, '[]'), interval(8, 10, '[]'), interval(11, 12, '[]')]),
-        (interval(4, 6, '[]') + interval(8, 10, '[]'), interval(5, 7, '[]') + interval(11, 12, '[]'),
+        (interval(4, 6, '[]') | interval(8, 10, '[]'), interval(5, 7, '[]') | interval(11, 12, '[]'),
          [interval(4, 7, '[]'), interval(8, 10, '[]'), interval(11, 12, '[]')]),
-        (interval(1, 6, '[]') + interval(8, 10, '[]'), interval(2, 3, '[]') + interval(4, 5, '[]'),
+        (interval(1, 6, '[]') | interval(8, 10, '[]'), interval(2, 3, '[]') | interval(4, 5, '[]'),
          [interval(1, 6, '[]'), interval(8, 10, '[]')]),
-        (interval(1, 6, '[]') + interval(8, 10, '[]'), interval(2, 3, '[]') + interval(4, 7, '[]'),
+        (interval(1, 6, '[]') | interval(8, 10, '[]'), interval(2, 3, '[]') | interval(4, 7, '[]'),
          [interval(1, 7, '[]'), interval(8, 10, '[]')]),
     ))
     def test__interval_int__add__unit(self, interval1, interval2, interval_m):
         """UnionInterval[int]()の加法演算 (合併) をテストする。
         """
         if isinstance(interval_m, list):
-            result = interval2 + interval1
+            result = interval2 | interval1
             assert not result.is_empty
             assert result._unit_list == list(map(lambda ui: ui._unit_list[0], interval_m))
 
-            result = interval1 + interval2
+            result = interval1 | interval2
             assert not result.is_empty
             assert result._unit_list == list(map(lambda ui: ui._unit_list[0], interval_m))
         else:
-            result = interval2 + interval1
+            result = interval2 | interval1
             assert result == interval_m
 
-            result = interval1 + interval2
+            result = interval1 | interval2
             assert result == interval_m
 
     @pytest.mark.parametrize('interval1, interval2, interval_r', (
         # interval1 を2つに分割するパターン
-        (interval(1, 10, edge='[)'), interval(5, 6, edge='[]'), interval(1, 5, edge='[)') + interval(6, 10, edge='()')),
-        (interval(1, 10, edge='[)'), interval(5, 6, edge='[)'), interval(1, 5, edge='[)') + interval(6, 10, edge='[)')),
-        (interval(1, 10, edge='[)'), interval(5, 6, edge='(]'), interval(1, 5, edge='[]') + interval(6, 10, edge='()')),
-        (interval(1, 10, edge='[)'), interval(5, 6, edge='()'), interval(1, 5, edge='[]') + interval(6, 10, edge='[)')),
-        (interval(1, 10, edge='[)'), interval(singleton=5), interval(1, 5, edge='[)') + interval(5, 10, edge='()')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='[]'), interval(1, 5, edge='[)') | interval(6, 10, edge='()')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='[)'), interval(1, 5, edge='[)') | interval(6, 10, edge='[)')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='(]'), interval(1, 5, edge='[]') | interval(6, 10, edge='()')),
+        (interval(1, 10, edge='[)'), interval(5, 6, edge='()'), interval(1, 5, edge='[]') | interval(6, 10, edge='[)')),
+        (interval(1, 10, edge='[)'), interval(singleton=5), interval(1, 5, edge='[)') | interval(5, 10, edge='()')),
         # interval1 の左側が削られるパターン
         (interval(1, 10, edge='[)'), interval(0, 6, edge='[]'), interval(6, 10, edge='()')),
         (interval(1, 10, edge='[)'), interval(0, 6, edge='[)'), interval(6, 10, edge='[)')),
@@ -529,7 +531,7 @@ class TestUnionIntervalClass:
         (interval(1, 10, edge='[]'), interval(1, 10, edge='[]'), interval(empty=True)),
         (interval(1, 10, edge='[]'), interval(1, 10, edge='[)'), interval(singleton=10)),
         (interval(1, 10, edge='[]'), interval(1, 10, edge='(]'), interval(singleton=1)),
-        (interval(1, 10, edge='[]'), interval(1, 10, edge='()'), interval(singleton=1) + interval(singleton=10)),
+        (interval(1, 10, edge='[]'), interval(1, 10, edge='()'), interval(singleton=1) | interval(singleton=10)),
         # オペランドの一方が空であるパターン
         (interval(1, 10, edge='[]'), interval(empty=True), interval(1, 10, edge='[]')),
         (interval(1, 10, edge='[)'), interval(empty=True), interval(1, 10, edge='[)')),
@@ -544,8 +546,8 @@ class TestUnionIntervalClass:
         (interval(1, 10, edge='[]'), interval(None, 5, edge='(]'), interval(5, 10, edge='(]')),
         (interval(1, 10, edge='[]'), interval(None, None), interval(empty=True)),
         # 他
-        (interval(1, 2) + interval(3, 4), interval(1.5, 1.7) + interval(1.9, 3.5),
-         interval(1.0, 1.5) + interval(1.7, 1.9) + interval(3.5, 4.0)),
+        (interval(1, 2) | interval(3, 4), interval(1.5, 1.7) | interval(1.9, 3.5),
+         interval(1.0, 1.5) | interval(1.7, 1.9) | interval(3.5, 4.0)),
 
     ))
     def test__interval_int__sub__unit(self, interval1, interval2, interval_r):
@@ -661,15 +663,15 @@ class TestUnionIntervalClass:
         (interval(5, 9, '(]'), interval(9, 12, '[]'), interval(9, 9, '[]')),
         (interval(5, 9, '[]'), interval(9, 12, '[]'), interval(9, 9, '[]')),
         # オペランドが区間でない場合
-        (interval(5, 10, '(]') + interval(15, 20, '[)'), interval(7, 8, '()') + interval(9, 18, '()'),
-         interval(7, 8, '()') + interval(9, 10, '(]') + interval(15, 18, '[)')),
-        (interval(5, 10, '(]') + interval(15, 20, '[)'), interval(empty=True), interval(empty=True)),
+        (interval(5, 10, '(]') | interval(15, 20, '[)'), interval(7, 8, '()') | interval(9, 18, '()'),
+         interval(7, 8, '()') | interval(9, 10, '(]') | interval(15, 18, '[)')),
+        (interval(5, 10, '(]') | interval(15, 20, '[)'), interval(empty=True), interval(empty=True)),
     ))
     def test__interval_int__mul(self, interval1, interval2, interval_m):
         """UnionInterval[int]()の乗法演算 (交叉) をテストする。
         """
-        assert interval1 * interval2 == interval_m
-        assert interval2 * interval1 == interval_m
+        assert interval1 & interval2 == interval_m
+        assert interval2 & interval1 == interval_m
 
     @pytest.mark.parametrize('interval1, interval2, expected_issubset', (
         (interval(5, 10), interval(0, 20), True),
@@ -698,11 +700,11 @@ class TestUnionIntervalClass:
         (interval(0, 10), interval(), True),
         (interval(empty=True), interval(), True),
         (interval(), interval(empty=True), False),
-        (interval(0, 10, '[]') + interval(20, 30), interval(0, 30, '[]'), True),
-        (interval(0, 10, '[]') + interval(20, 30), interval(5, 25, '[]'), False),
-        (interval(0, 10, '[]') + interval(20, 30), interval(0, 11) + interval(18, 35), True),
-        (interval(0, 10, '[]') + interval(20, 30), interval(0, 11) + interval(25, 27), False),
-        (interval(0, 10, '[]') + interval(20, 30), interval(0, 9) + interval(18, 35), False),
+        (interval(0, 10, '[]') | interval(20, 30), interval(0, 30, '[]'), True),
+        (interval(0, 10, '[]') | interval(20, 30), interval(5, 25, '[]'), False),
+        (interval(0, 10, '[]') | interval(20, 30), interval(0, 11) | interval(18, 35), True),
+        (interval(0, 10, '[]') | interval(20, 30), interval(0, 11) | interval(25, 27), False),
+        (interval(0, 10, '[]') | interval(20, 30), interval(0, 9) | interval(18, 35), False),
     ))
     def test__interval_int__issubset(self, interval1: UnionInterval, interval2: UnionInterval, expected_issubset: bool):
         """UnionInterval[int]()の包含判定をテストする。
@@ -728,24 +730,24 @@ class TestUnionIntervalClass:
             assert not interval2 > interval1
 
     @pytest.mark.parametrize('interval1, interval2', (
-        (interval(1, 5, edge='[]'), interval(None, 1, edge='()') + interval(5, None, edge='()')),
-        (interval(1, 5, edge='[)'), interval(None, 1, edge='()') + interval(5, None, edge='[)')),
-        (interval(1, 5, edge='(]'), interval(None, 1, edge='(]') + interval(5, None, edge='()')),
-        (interval(1, 5, edge='()'), interval(None, 1, edge='(]') + interval(5, None, edge='[)')),
+        (interval(1, 5, edge='[]'), interval(None, 1, edge='()') | interval(5, None, edge='()')),
+        (interval(1, 5, edge='[)'), interval(None, 1, edge='()') | interval(5, None, edge='[)')),
+        (interval(1, 5, edge='(]'), interval(None, 1, edge='(]') | interval(5, None, edge='()')),
+        (interval(1, 5, edge='()'), interval(None, 1, edge='(]') | interval(5, None, edge='[)')),
         (interval(empty=True), interval(None, None)),
-        (interval(1, 5, edge='[]') + interval(10, 15, edge='[]'),
-         interval(None, 1, edge='()') + interval(5, 10, edge='()') + interval(15, None, edge='()')),
-        (interval(1, 5, edge='[]') + interval(10, 15, edge='(]'),
-         interval(None, 1, edge='()') + interval(5, 10, edge='(]') + interval(15, None, edge='()')),
-        (interval(1, 5, edge='[)') + interval(10, 15, edge='[]'),
-         interval(None, 1, edge='()') + interval(5, 10, edge='[)') + interval(15, None, edge='()')),
-        (interval(1, 5, edge='[)') + interval(10, 15, edge='(]'),
-         interval(None, 1, edge='()') + interval(5, 10, edge='[]') + interval(15, None, edge='()')),
-        (interval(None, 5, edge='()') + interval(5, None, edge='()'), interval(5, 5, edge='[]')),
-        (interval(1, 5, edge='()') + interval(5, None, edge='()'),
-         interval(None, 1, edge='(]') + interval(5, 5, edge='[]')),
-        (interval(None, 5, edge='()') + interval(5, 10, edge='()'),
-         interval(5, 5, edge='[]') + interval(10, None, edge='[)')),
+        (interval(1, 5, edge='[]') | interval(10, 15, edge='[]'),
+         interval(None, 1, edge='()') | interval(5, 10, edge='()') | interval(15, None, edge='()')),
+        (interval(1, 5, edge='[]') | interval(10, 15, edge='(]'),
+         interval(None, 1, edge='()') | interval(5, 10, edge='(]') | interval(15, None, edge='()')),
+        (interval(1, 5, edge='[)') | interval(10, 15, edge='[]'),
+         interval(None, 1, edge='()') | interval(5, 10, edge='[)') | interval(15, None, edge='()')),
+        (interval(1, 5, edge='[)') | interval(10, 15, edge='(]'),
+         interval(None, 1, edge='()') | interval(5, 10, edge='[]') | interval(15, None, edge='()')),
+        (interval(None, 5, edge='()') | interval(5, None, edge='()'), interval(5, 5, edge='[]')),
+        (interval(1, 5, edge='()') | interval(5, None, edge='()'),
+         interval(None, 1, edge='(]') | interval(5, 5, edge='[]')),
+        (interval(None, 5, edge='()') | interval(5, 10, edge='()'),
+         interval(5, 5, edge='[]') | interval(10, None, edge='[)')),
     ))
     def test__interval_int__complement(self, interval1: UnionInterval, interval2: UnionInterval):
         """UnionInterval[int]()の補集合をテストする。
@@ -762,10 +764,10 @@ class TestUnionIntervalClass:
         (interval(1, None, edge='()'), True, False),
         (interval(None, None, edge='()'), False, False),
         (interval(empty=True), True, True),
-        (interval(1, 5, edge='[]') + interval(7, 10, edge='[]'), True, True),
-        (interval(None, 5, edge='[]') + interval(7, 10, edge='[]'), False, True),
-        (interval(1, 5, edge='[]') + interval(7, None, edge='[]'), True, False),
-        (interval(None, 5, edge='[]') + interval(7, None, edge='[]'), False, False),
+        (interval(1, 5, edge='[]') | interval(7, 10, edge='[]'), True, True),
+        (interval(None, 5, edge='[]') | interval(7, 10, edge='[]'), False, True),
+        (interval(1, 5, edge='[]') | interval(7, None, edge='[]'), True, False),
+        (interval(None, 5, edge='[]') | interval(7, None, edge='[]'), False, False),
     ))
     def test__interval_int__bound(self, interval1: UnionInterval, bounded_below, bounded_above):
         """UnionInterval[int]()の有界判定をテストする。
@@ -779,7 +781,7 @@ class TestUnionIntervalClass:
         (interval(1, 5, edge='(]'), 4),
         (interval(1, 5, edge='()'), 4),
         (interval(empty=True), 0),
-        (interval(1, 5, edge='()') + interval(9, 11, edge='()'), 6),
+        (interval(1, 5, edge='()') | interval(9, 11, edge='()'), 6),
         (interval(singleton=1), 0),
         (interval(datetime(2020, 12, 30, 11, 22, 33), datetime(2020, 12, 30, 11, 22, 34), '[]'), timedelta(seconds=1)),
         (interval(singleton=datetime(2020, 12, 30, 11, 22, 33)), timedelta(seconds=0)),
@@ -803,9 +805,9 @@ class TestUnionIntervalClass:
             interval(1, None),
             interval(None, 5),
             interval(None, None),
-            interval(1, 2) + interval(5, None),
-            interval(None, 2) + interval(5, 10),
-            interval(None, 2) + interval(5, None),
+            interval(1, 2) | interval(5, None),
+            interval(None, 2) | interval(5, 10),
+            interval(None, 2) | interval(5, None),
     ))
     def test__interval__measure_err(self, interval1: UnionInterval):
         """UnionInterval()の測度関数をテストする。
@@ -823,7 +825,7 @@ class TestUnionIntervalClass:
     def test__interval__iteration(self, intervals: Sequence[UnionInterval]):
         """UnionInterval の Iterableとしての挙動をテストする
         """
-        interval1: UnionInterval = sum(intervals, interval(empty=True))
+        interval1: UnionInterval = reduce(operator.or_, intervals, interval(empty=True))
         assert isinstance(interval1, Iterable)
         assert list(interval1) == list(intervals)
         for i in range(len(intervals)):
@@ -833,7 +835,7 @@ class TestUnionIntervalClass:
             assert isinstance(interval1[-i], UnionInterval)
             assert interval1[-i] == intervals[-i]
         if len(intervals) >= 2:
-            interval2: UnionInterval = sum(intervals[1:], interval(empty=True))
+            interval2: UnionInterval = reduce(operator.or_, intervals[1:], interval(empty=True))
             assert isinstance(interval1[1:], UnionInterval)
             assert interval1[1:] == interval2
 
@@ -845,9 +847,9 @@ class TestUnionIntervalClass:
         (interval(1, 5, edge='()'), True),
         (interval(1, None), True),
         (interval(None, 1), True),
-        (interval(1, 3) + interval(3, 4), True),
-        (interval(1, 2) + interval(3, 4), False),
-        (interval(1, 2) + interval(3, 4) + interval(5, 6), False),
+        (interval(1, 3) | interval(3, 4), True),
+        (interval(1, 2) | interval(3, 4), False),
+        (interval(1, 2) | interval(3, 4) | interval(5, 6), False),
     ))
     def test__interval__is_interval(self, interval1: UnionInterval, is_interval: bool):
         """UnionInterval#is_interval のテスト
@@ -863,10 +865,10 @@ class TestUnionIntervalClass:
         (interval(1, None), 1, None, 1, None),
         (interval(None, 1), None, 1, None, None),
         (interval(None, None), None, None, None, None),
-        (interval(1, 3) + interval(3, 4), 1, 4, 1, None),
-        (interval(1, 2) + interval(3, 4), 1, 4, 1, None),
-        (interval(1, 2) + interval(3, 4) + interval(5, 6), 1, 6, 1, None),
-        (interval(1, 2, edge='[]') + interval(3, 4, edge='(]') + interval(5, 6, edge='()'), 1, 6, 1, None),
+        (interval(1, 3) | interval(3, 4), 1, 4, 1, None),
+        (interval(1, 2) | interval(3, 4), 1, 4, 1, None),
+        (interval(1, 2) | interval(3, 4) | interval(5, 6), 1, 6, 1, None),
+        (interval(1, 2, edge='[]') | interval(3, 4, edge='(]') | interval(5, 6, edge='()'), 1, 6, 1, None),
     ))
     def test__interval__min_max(self, interval1: UnionInterval, inf, sup, min_v, max_v):
         """UnionInterval の最大値/最小値のテスト
@@ -885,22 +887,22 @@ class TestUnionIntervalClass:
         (interval(1, None), False, True),
         (interval(None, 1), True, True),
         (interval(None, None), True, True),
-        (interval(1, 2, edge='[]') + interval(3, 4, edge='[]'), False, False),
-        (interval(1, 2, edge='[)') + interval(3, 4, edge='[]'), False, False),
-        (interval(1, 2, edge='(]') + interval(3, 4, edge='[]'), True, False),
-        (interval(1, 2, edge='()') + interval(3, 4, edge='[]'), True, False),
-        (interval(1, 2, edge='[]') + interval(3, 4, edge='[)'), False, True),
-        (interval(1, 2, edge='[)') + interval(3, 4, edge='[)'), False, True),
-        (interval(1, 2, edge='(]') + interval(3, 4, edge='[)'), True, True),
-        (interval(1, 2, edge='()') + interval(3, 4, edge='[)'), True, True),
-        (interval(1, 2, edge='[]') + interval(3, 4, edge='(]'), False, False),
-        (interval(1, 2, edge='[)') + interval(3, 4, edge='(]'), False, False),
-        (interval(1, 2, edge='(]') + interval(3, 4, edge='(]'), True, False),
-        (interval(1, 2, edge='()') + interval(3, 4, edge='(]'), True, False),
-        (interval(1, 2, edge='[]') + interval(3, 4, edge='()'), False, True),
-        (interval(1, 2, edge='[)') + interval(3, 4, edge='()'), False, True),
-        (interval(1, 2, edge='(]') + interval(3, 4, edge='()'), True, True),
-        (interval(1, 2, edge='()') + interval(3, 4, edge='()'), True, True),
+        (interval(1, 2, edge='[]') | interval(3, 4, edge='[]'), False, False),
+        (interval(1, 2, edge='[)') | interval(3, 4, edge='[]'), False, False),
+        (interval(1, 2, edge='(]') | interval(3, 4, edge='[]'), True, False),
+        (interval(1, 2, edge='()') | interval(3, 4, edge='[]'), True, False),
+        (interval(1, 2, edge='[]') | interval(3, 4, edge='[)'), False, True),
+        (interval(1, 2, edge='[)') | interval(3, 4, edge='[)'), False, True),
+        (interval(1, 2, edge='(]') | interval(3, 4, edge='[)'), True, True),
+        (interval(1, 2, edge='()') | interval(3, 4, edge='[)'), True, True),
+        (interval(1, 2, edge='[]') | interval(3, 4, edge='(]'), False, False),
+        (interval(1, 2, edge='[)') | interval(3, 4, edge='(]'), False, False),
+        (interval(1, 2, edge='(]') | interval(3, 4, edge='(]'), True, False),
+        (interval(1, 2, edge='()') | interval(3, 4, edge='(]'), True, False),
+        (interval(1, 2, edge='[]') | interval(3, 4, edge='()'), False, True),
+        (interval(1, 2, edge='[)') | interval(3, 4, edge='()'), False, True),
+        (interval(1, 2, edge='(]') | interval(3, 4, edge='()'), True, True),
+        (interval(1, 2, edge='()') | interval(3, 4, edge='()'), True, True),
     ))
     def test__interval__open__closed(self, interval1: UnionInterval, left_open, right_open):
         """UnionInterval の left_open, right_open のテスト
@@ -927,8 +929,8 @@ class TestUnionIntervalClass:
         (interval(1, 2, edge='[)'), False),
         (interval(1, 2, edge='(]'), False),
         (interval(1, 2, edge='()'), False),
-        (interval(singleton=1) + interval(singleton=1), True),
-        (interval(singleton=1) + interval(singleton=2), False),
+        (interval(singleton=1) | interval(singleton=1), True),
+        (interval(singleton=1) | interval(singleton=2), False),
     ))
     def test__interval__is_singleton(self, interval1: UnionInterval, is_singleton):
         """単集合判定をテストする。
